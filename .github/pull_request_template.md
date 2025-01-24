@@ -1,11 +1,4 @@
----
-name: PR Template
-about: PR Template 입니다.
-title: "✨[part] <Issue Title>"
-labels: ''
-assignees: ''
 
----
 
 ### 🌈 Issue 번호
 - close #
