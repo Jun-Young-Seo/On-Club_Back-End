@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 @Component
 public class JwtTokenGenerator {
@@ -65,5 +66,15 @@ public class JwtTokenGenerator {
         catch (ExpiredJwtException e){
             return e.getClaims();
         }
+    }
+    public String createToken(String userTel, String role){
+        return Jwts.builder()
+                .setSubject(userTel)
+                .claim("auth",role)
+                .setIssuedAt(new Date())
+                //1hour 유효기간
+                .setExpiration(new Date(System.currentTimeMillis()+ 1000*60*60))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 }

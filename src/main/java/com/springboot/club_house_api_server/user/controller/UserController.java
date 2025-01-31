@@ -1,6 +1,8 @@
 package com.springboot.club_house_api_server.user.controller;
 
 import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
+import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
+import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
 import com.springboot.club_house_api_server.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,5 +20,11 @@ public class UserController {
     public ResponseEntity<String> join(@RequestBody JoinRequestDto request){
         userService.join(request);
         return ResponseEntity.ok("회원가입 성공");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request){
+        LoginResponseDto r= userService.login(request);
+        return ResponseEntity.ok(r);
     }
 }
