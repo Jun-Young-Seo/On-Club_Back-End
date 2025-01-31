@@ -2,6 +2,8 @@ package com.springboot.club_house_api_server.user.service;
 
 import com.springboot.club_house_api_server.jwt.generator.JwtTokenGenerator;
 import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
+import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
+import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +33,20 @@ public class UserService {
                 .userTel(joinRequestDto.getUserTel())
                 .build();
         userRepository.save(userEntity);
+    }
+
+    public LoginResponseDto login(LoginRequestDto loginRequestDto){
+        Optional<UserEntity> user = userRepository.findByUserTel(loginRequestDto.getUserTel());
+        if(!user.isPresent()){
+            throw new IllegalArgumentException("존재하지 않는 전화번호입니다.");
+        }
+        if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.get().getPassword())){
+            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+        }
+
+        String accessToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER");
+        String refreshToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER");
+
+        return new LoginResponseDto(accessToken, refreshToken);
     }
 }
