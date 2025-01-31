@@ -34,7 +34,7 @@ public class UserService {
                 .build();
         userRepository.save(userEntity);
     }
-
+    //Login
     public LoginResponseDto login(LoginRequestDto loginRequestDto){
         Optional<UserEntity> user = userRepository.findByUserTel(loginRequestDto.getUserTel());
         if(!user.isPresent()){
@@ -43,10 +43,25 @@ public class UserService {
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.get().getPassword())){
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
+        long accessTokenValidity = 1000 * 60 * 15; // 15분 - accessToken
+        long refreshTokenValidity = 1000 * 60 * 60; // 1시간 - RefreshToken
 
-        String accessToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER");
-        String refreshToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER");
+        String accessToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",accessTokenValidity);
+        String refreshToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",refreshTokenValidity);
 
         return new LoginResponseDto(accessToken, refreshToken);
+    }
+
+    //refresh Token
+    public LoginResponseDto refreshToken(String refreshToken){
+        if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
+            throw new IllegalArgumentException("Invalid Refresh Token");
+        }
+
+        String userTel = jwtTokenGenerator.getUserTel(refreshToken);
+        long accessTokenValidity = 1000 * 60 * 15;
+        String newAccessToken = jwtTokenGenerator.createToken(userTel, "ROLE_USER", accessTokenValidity);
+
+        return new LoginResponseDto(newAccessToken, refreshToken);
     }
 }

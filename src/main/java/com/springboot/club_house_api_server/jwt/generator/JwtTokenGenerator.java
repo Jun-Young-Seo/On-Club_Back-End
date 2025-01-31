@@ -67,14 +67,22 @@ public class JwtTokenGenerator {
             return e.getClaims();
         }
     }
-    public String createToken(String userTel, String role){
+    public String createToken(String userTel, String role, long expireTime){
         return Jwts.builder()
                 .setSubject(userTel)
                 .claim("auth",role)
                 .setIssuedAt(new Date())
                 //1hour 유효기간
-                .setExpiration(new Date(System.currentTimeMillis()+ 1000*60*60))
+                .setExpiration(new Date(System.currentTimeMillis()+ expireTime))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+    public String getUserTel(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 }
