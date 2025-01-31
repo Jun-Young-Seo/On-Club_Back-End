@@ -2,6 +2,7 @@ package com.springboot.club_house_api_server.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -16,17 +17,23 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @AllArgsConstructor(access = PRIVATE)
 public class UserEntity {
+    //DB상의 ID. Login ID 아님
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private long userId;
 
     @Column(name ="user_name")
     private String userName;
 
-    @Column(name = "user_tel")
+    @Column(name="password", nullable = false)
+    private String password;
+
+    //Tel이 유일하므로 로그인용 ID로 사용 예정
+    @Column(name = "user_tel", unique = true, nullable = false)
     private String userTel;
 
-    @Column (name= "created_at")
+    @Column (name= "created_at", updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 }
