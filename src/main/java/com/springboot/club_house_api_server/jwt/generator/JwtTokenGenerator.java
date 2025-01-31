@@ -23,7 +23,7 @@ public class JwtTokenGenerator {
     private static final Logger log = LoggerFactory.getLogger(JwtTokenGenerator.class);
     private final Key key;
 
-    public JwtTokenGenerator(@Value("${jwt.token}") String secretKey) {
+    public JwtTokenGenerator(@Value("${jwt.secret}") String secretKey) {
         //HMAC-SHA 알고리즘 사용
         this.key= Keys.hmacShaKeyFor(secretKey.getBytes());
     }
