@@ -5,6 +5,7 @@ import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
 import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
 import com.springboot.club_house_api_server.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,5 +34,17 @@ public class UserController {
         }
         LoginResponseDto response = userService.refreshToken(refreshToken);
         return ResponseEntity.ok(response);
+    }
+
+    //For Test Exception Filter
+    @GetMapping("/test")
+    public ResponseEntity<String> test(){
+        return new ResponseEntity<>("Correct Token", HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String refreshToken){
+        String logoutMsg = userService.logout(refreshToken);
+        return ResponseEntity.ok(logoutMsg);
     }
 }

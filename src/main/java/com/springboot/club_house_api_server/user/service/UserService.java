@@ -43,12 +43,13 @@ public class UserService {
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.get().getPassword())){
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
-        long accessTokenValidity = 1000 * 60 * 15; // 15분 - accessToken
+        long accessTokenValidity = 1000 * 60 * 15 ; // 15분 - accessToken
         long refreshTokenValidity = 1000 * 60 * 60; // 1시간 - RefreshToken
 
         String accessToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",accessTokenValidity);
         String refreshToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",refreshTokenValidity);
-
+        user.get().setRefreshToken(refreshToken);
+        userRepository.save(user.get());
         return new LoginResponseDto(accessToken, refreshToken);
     }
 
@@ -59,9 +60,36 @@ public class UserService {
         }
 
         String userTel = jwtTokenGenerator.getUserTel(refreshToken);
+        Optional<UserEntity> user = userRepository.findByUserTel(userTel);
+        if(!user.isPresent()){
+            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+        }
+        if(!user.get().getRefreshToken().equals(refreshToken)){
+            throw new IllegalArgumentException("위조된 토큰일 수 있습니다.");
+        }
         long accessTokenValidity = 1000 * 60 * 15;
         String newAccessToken = jwtTokenGenerator.createToken(userTel, "ROLE_USER", accessTokenValidity);
 
         return new LoginResponseDto(newAccessToken, refreshToken);
+    }
+
+    public String logout(String refreshToken){
+        if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
+            throw new IllegalArgumentException("Invalid Refresh Token");
+        }
+        String userTel = jwtTokenGenerator.getUserTel(refreshToken);
+        Optional<UserEntity> user = userRepository.findByUserTel(userTel);
+
+        if(!user.isPresent()){
+            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+        }
+        if(!user.get().getRefreshToken().equals(refreshToken)){
+            throw new IllegalArgumentException("위조된 토큰일 수 있습니다.");
+        }
+
+        user.get().setRefreshToken(null);
+        userRepository.save(user.get());
+
+        return userTel+" 정상적으로 로그아웃 됐습니다.";
     }
 }
