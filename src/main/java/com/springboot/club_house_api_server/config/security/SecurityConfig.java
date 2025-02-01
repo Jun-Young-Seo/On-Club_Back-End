@@ -1,6 +1,7 @@
 package com.springboot.club_house_api_server.config.security;
 
 import com.springboot.club_house_api_server.jwt.filter.JwtAuthenticationFilter;
+import com.springboot.club_house_api_server.jwt.filter.JwtExceptionFilter;
 import com.springboot.club_house_api_server.jwt.generator.JwtTokenGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -35,15 +36,17 @@ public class SecurityConfig {
                 //모든 요청 허용 --> 테스트라서.
                 //login Endpoint 만들면 수정하기
                 //ex)
-                //authorize.antMatchers("/api/admin/**").hasRole("ADMIN")
-                //         .antMatchers("/api/user/**").authenticated();
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll())
-                //모든 요청을 가로채서 jwtAuthenticationFilter를 거치게 하기
-                //UsernamePasswordAuthenticationFilter(Spring Security 기본필터)전에 실행됨
+                        .requestMatchers("/api/user/login","/api/user/join", "/api/user/logout").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
+                        .requestMatchers("/api/user/**").hasRole("USER")
+                        .anyRequest().permitAll()
+                )
+                //커스텀 예외 필터 -> 인증 필터로 처리
+                //커스텀 예외 필터에서 만료토큰, 위조토큰 처리
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenGenerator),
                         UsernamePasswordAuthenticationFilter.class
                 )
+                .addFilterBefore(new JwtExceptionFilter(), JwtAuthenticationFilter.class)
                 .build();
     }
 

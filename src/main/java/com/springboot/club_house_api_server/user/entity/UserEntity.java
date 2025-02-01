@@ -36,4 +36,7 @@ public class UserEntity {
     @Column (name= "created_at", updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @Column(name ="refresh_token")
+    private String refreshToken;
 }

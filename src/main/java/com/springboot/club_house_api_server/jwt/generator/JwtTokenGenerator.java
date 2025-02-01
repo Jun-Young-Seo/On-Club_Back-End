@@ -44,20 +44,18 @@ public class JwtTokenGenerator {
         UserDetails principal = new User(claims.getSubject(),"",authorities);
         return new UsernamePasswordAuthenticationToken(principal,"",authorities);
     }
+    //토큰 검증용 메서드
     public boolean validateToken(String token) {
-        try{
+        //Jwt 파서에 키(DI 되어있음)를 이용해서 서명 검증
+        //실패하면 파서단에서 예외가 터지므로 return false가 필요하지 않음
+        //터진 예외는 ExceptionHandler에서 처리하도록 했음.
+        try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        }catch(SecurityException | MalformedJwtException e){
-            log.info("Invalid JWT token",e);
-        }catch(ExpiredJwtException e){
-            log.info("Expired JWT token",e);
-        }catch(UnsupportedJwtException e){
-            log.info("Unsupported JWT token",e);
-        }catch(IllegalArgumentException e){
-            log.info("JWT claims string is empty",e);
         }
-        return false;
+        catch (Exception e) {
+            throw e;
+        }
+        return true;
     }
     private Claims parseClaims(String accessToken) {
         try{
