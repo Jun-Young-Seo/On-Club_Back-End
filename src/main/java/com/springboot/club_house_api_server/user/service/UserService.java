@@ -48,9 +48,10 @@ public class UserService {
 
         String accessToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",accessTokenValidity);
         String refreshToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",refreshTokenValidity);
+        String userTel = loginRequestDto.getUserTel();
         user.get().setRefreshToken(refreshToken);
         userRepository.save(user.get());
-        return new LoginResponseDto(accessToken, refreshToken);
+        return new LoginResponseDto(userTel,accessToken, refreshToken);
     }
 
     //refresh Token
@@ -70,7 +71,7 @@ public class UserService {
         long accessTokenValidity = 1000 * 60 * 15;
         String newAccessToken = jwtTokenGenerator.createToken(userTel, "ROLE_USER", accessTokenValidity);
 
-        return new LoginResponseDto(newAccessToken, refreshToken);
+        return new LoginResponseDto(newAccessToken, refreshToken, userTel);
     }
 
     public String logout(String refreshToken){
