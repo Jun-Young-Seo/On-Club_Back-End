@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 //로그인 응답용 DTO
 public class LoginResponseDto {
+    private String userTel;
     private String accessToken;
     private String refreshToken;
 }

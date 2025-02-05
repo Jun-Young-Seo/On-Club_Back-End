@@ -1,10 +1,13 @@
 package com.springboot.club_house_api_server.user.entity;
 
+import com.springboot.club_house_api_server.club.entity.ClubEntity;
+import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static lombok.AccessLevel.PRIVATE;
 import static lombok.AccessLevel.PROTECTED;
@@ -39,4 +42,7 @@ public class UserEntity {
 
     @Column(name ="refresh_token")
     private String refreshToken;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<MembershipEntity> memberships;
 }
