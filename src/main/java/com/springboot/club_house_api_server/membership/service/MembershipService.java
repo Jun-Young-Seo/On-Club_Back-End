@@ -1,4 +1,4 @@
-package com.springboot.club_house_api_server.service;
+package com.springboot.club_house_api_server.membership.service;
 
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;

@@ -31,9 +31,9 @@ public interface ClubRepository extends JpaRepository<ClubEntity, Long> {
     List<ClubEntity> findClubsCreatedBetween(@Param("startDate") LocalDateTime startDate,
                                              @Param("endDate") LocalDateTime endDate);
 
-    // 3. 특정 클럽에 가입한 모든 사용자 조회 (Membership 조인)
+    // 3. 특정 클럽에 가입한 모든 User 조회
     @Query("SELECT u FROM UserEntity u JOIN u.memberships m WHERE m.club.clubId = :clubId")
-    List<UserEntity> findMembersByClubId(@Param("clubId") Long clubId);
+    List<UserEntity> findAllClubMembers(@Param("clubId") Long clubId);
 
     // 4. 특정 클럽에 특정 기간 동안 가입한 사용자 조회 (Membership 조인)
     @Query("SELECT u FROM UserEntity u JOIN u.memberships m WHERE m.club.clubId = :clubId AND m.joinedAt BETWEEN :startDate AND :endDate")
