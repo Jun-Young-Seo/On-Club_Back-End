@@ -2,12 +2,15 @@ package com.springboot.club_house_api_server.club.service;
 
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
+import com.springboot.club_house_api_server.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +27,7 @@ public class ClubService {
         }
         return ResponseEntity.ok(clubs);
     }
+    //이름으로 클럽 찾기
     public ResponseEntity<?> getClubByName(String clubName) {
         Optional<ClubEntity> club = clubRepository.findByClubName(clubName);
         if (club.isPresent()) {
@@ -31,7 +35,7 @@ public class ClubService {
         }
         return ResponseEntity.noContent().build(); //HTTP 204 No Content
     }
-
+    //동호회 신규 생성 - 중복 이름 생성 불가능
     public ResponseEntity<?> addClub(String clubName, String clubDescription, String clubLogoURL, String clubBackgroundURL) {
         Optional<ClubEntity> clubOpt = clubRepository.findByClubName(clubName);
         if (clubOpt.isPresent()) {
@@ -50,4 +54,20 @@ public class ClubService {
         return ResponseEntity.ok(club);
     }
 
+    //클럽 소속 모든 유저 찾기
+    public ResponseEntity<?> findAllClubMembers(Long clubId){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(!clubOpt.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("club Id에 해당하는 클럽이 없습니다.");
+        }
+        List<UserEntity> clubUsers = clubRepository.findAllClubMembers(clubId);
+        List<List<String>> userInfos = new ArrayList<>();
+        for(UserEntity user : clubUsers){
+            List<String> userInfo = new ArrayList<>();
+            userInfo.add(user.getUserName());
+            userInfo.add(user.getUserTel());
+            userInfos.add(userInfo);
+        }
+        return ResponseEntity.ok(userInfos);
+    }
 }

@@ -31,4 +31,9 @@ public class ClubController {
     public ResponseEntity<?> findClubByName(@RequestParam String clubName){
         return clubService.getClubByName(clubName);
     }
+
+    @GetMapping("/find/all-members")
+    public ResponseEntity<?> findAllMembers(@RequestParam long clubId){
+        return clubService.findAllClubMembers(clubId);
+    }
 }
