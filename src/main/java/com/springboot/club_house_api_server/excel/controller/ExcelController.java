@@ -1,5 +1,6 @@
 package com.springboot.club_house_api_server.excel.controller;
 
+import com.springboot.club_house_api_server.excel.dto.ExcelDto;
 import com.springboot.club_house_api_server.excel.service.BudgetService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.EncryptedDocumentException;
@@ -27,10 +28,7 @@ import java.util.Map;
 public class ExcelController {
     private final BudgetService budgetService;
     @PostMapping("/budget")
-    public ResponseEntity<?> readExcel(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("password") String password,
-            @RequestParam("sheetNum") int sheetNum) {
-        return budgetService.readBudgetExcel(file,password,sheetNum);
+    public ResponseEntity<?> readExcel(@ModelAttribute ExcelDto excelDto) {
+        return budgetService.readBudgetExcel(excelDto);
     }
 }
