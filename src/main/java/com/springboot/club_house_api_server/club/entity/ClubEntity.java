@@ -1,7 +1,7 @@
 package com.springboot.club_house_api_server.club.entity;
 
-import com.springboot.club_house_api_server.budget.entity.AccountEntity;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
+import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,7 +45,7 @@ public class ClubEntity {
 
     // 양방향 매핑 - 클럽에서 계좌 정보 조회 가능
     @OneToMany(mappedBy = "club", fetch = FetchType.LAZY)
-    private List<AccountEntity> accounts;
+    private List<ClubAccountEntity> accounts;
 
     @OneToMany(mappedBy = "club",fetch = FetchType.LAZY)
     private List<MembershipEntity> memberships;

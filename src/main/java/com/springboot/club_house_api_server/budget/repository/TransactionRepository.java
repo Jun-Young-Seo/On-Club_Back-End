@@ -33,12 +33,8 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     List<TransactionEntity> findByTransactionCategory(@Param("category") String category);
 
     // 6. 특정 거래자(transactionWho)의 거래 내역 조회
-    @Query("SELECT t FROM TransactionEntity t WHERE t.transactionWho = :who")
-    List<TransactionEntity> findByTransactionWho(@Param("who") String who);
-
-    // 7. 특정 클럽에서 특정 거래자가 남긴 거래 내역 조회
-    @Query("SELECT t FROM TransactionEntity t WHERE t.club.clubId = :clubId AND t.transactionWho = :who")
-    List<TransactionEntity> findByClubIdAndTransactionWho(@Param("clubId") Long clubId, @Param("who") String who);
+    @Query("SELECT t FROM TransactionEntity t WHERE t.transactionDescription = :tel")
+    List<TransactionEntity> findByTransactionTel(@Param("tel") String tel);
 
     // 8. 특정 클럽에서 특정 기간 동안 발생한 거래 내역 조회
     @Query("SELECT t FROM TransactionEntity t WHERE t.club.clubId = :clubId AND t.transactionDate BETWEEN :startDate AND :endDate")
