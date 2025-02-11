@@ -69,8 +69,9 @@ public class UserService {
         if(!user.get().getRefreshToken().equals(refreshToken)){
             throw new IllegalArgumentException("위조된 토큰일 수 있습니다.");
         }
+        long userId = user.get().getUserId();
         long accessTokenValidity = 1000 * 60 * 15;
-        String newAccessToken = jwtTokenGenerator.createToken(userTel, "ROLE_USER", accessTokenValidity);
+        String newAccessToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER", accessTokenValidity);
 
         return new LoginResponseDto(newAccessToken, refreshToken, userTel);
     }
