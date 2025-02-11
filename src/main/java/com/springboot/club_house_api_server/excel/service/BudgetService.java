@@ -90,8 +90,16 @@ public class BudgetService {
                         String transactionMemo = dataFormatter.formatCellValue(row.getCell(7));//카카오뱅크 거래내역 메모 기능을 썼다면 저장되어있음
                         LocalDateTime parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
 
+                        //DB에 이미 저장되어 있는 거래내역인지 먼저 체크
+                        boolean alreadySaved = transactionRepository.isAlreadySavedTransaction(account,club,parsedDate);
+                        //있다면 루프 건너뛰기
+                        if(alreadySaved){
+                            continue;
+                        }
+                        //없는 경우에만 저장
                         TransactionEntity oneRow = new TransactionEntity(account, club, parsedDate,transactionType,transactionAmount,
                                 transactionBalance,transactionCategory,transactionDescription,transactionMemo);
+
                         transactionEntityList.add(oneRow);
                     }
                 }

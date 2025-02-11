@@ -28,6 +28,7 @@ public class ClubAccountService {
         ClubAccountEntity clubAccountEntity = new ClubAccountEntity(club, accountName, accountNumber, accountOwner, bankName);
 
         boolean accountExists = clubAccountRepository.isAlreadyExistAccount(club, accountName);
+        if (accountExists) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 클럽에 " + accountName + " 계좌가 존재합니다.");
         }
         clubAccountRepository.save(clubAccountEntity);

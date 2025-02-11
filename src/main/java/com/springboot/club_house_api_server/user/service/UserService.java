@@ -45,9 +45,10 @@ public class UserService {
         }
         long accessTokenValidity = 1000 * 60 * 15 ; // 15분 - accessToken
         long refreshTokenValidity = 1000 * 60 * 60; // 1시간 - RefreshToken
-
-        String accessToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",accessTokenValidity);
-        String refreshToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",refreshTokenValidity);
+        long userId = user.get().getUserId();
+        //setSubject는 String형으로 받으므로 valueOf
+        String accessToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER",accessTokenValidity);
+        String refreshToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER",refreshTokenValidity);
         String userTel = loginRequestDto.getUserTel();
         user.get().setRefreshToken(refreshToken);
         userRepository.save(user.get());
