@@ -78,24 +78,24 @@ public class BudgetService {
                     if(row==null){
                         continue;
                     }
+                    String transactionDate = dataFormatter.formatCellValue(row.getCell(1));//2024.10.16 18:04:40
+                    LocalDateTime parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
+                    //DB에 이미 저장되어 있는 거래내역인지 먼저 체크
+                    boolean alreadySaved = transactionRepository.isAlreadySavedTransaction(account,club,parsedDate);
+                    System.out.println(alreadySaved);
+                    //있다면 루프 건너뛰기
+                    if(alreadySaved){
+                        System.out.println(parsedDate+" Already Saved!");
+                        continue;
+                    }
                     for(Cell cell : row) {
-                        CellReference cellReference = new CellReference(row.getRowNum(), cell.getColumnIndex());
-
-                        String transactionDate = dataFormatter.formatCellValue(row.getCell(1));//2024.10.16 18:04:40
                         String transactionType = dataFormatter.formatCellValue(row.getCell(2));//입금/출금
                         int transactionAmount = parseInt(dataFormatter.formatCellValue(row.getCell(3)));//거래 금액 량
                         int transactionBalance = parseInt(dataFormatter.formatCellValue(row.getCell(4)));//거래 후 잔액
                         String transactionCategory = dataFormatter.formatCellValue(row.getCell(5));//일반입금, 일반이체, 이자 등으로 구분되는 필드
                         String transactionDescription    = dataFormatter.formatCellValue(row.getCell(6));//받는 분 통장에 표시할 내용이 저장되는 필드
                         String transactionMemo = dataFormatter.formatCellValue(row.getCell(7));//카카오뱅크 거래내역 메모 기능을 썼다면 저장되어있음
-                        LocalDateTime parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
-
-                        //DB에 이미 저장되어 있는 거래내역인지 먼저 체크
-                        boolean alreadySaved = transactionRepository.isAlreadySavedTransaction(account,club,parsedDate);
-                        //있다면 루프 건너뛰기
-                        if(alreadySaved){
-                            continue;
-                        }
+//                        parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
                         //없는 경우에만 저장
                         TransactionEntity oneRow = new TransactionEntity(account, club, parsedDate,transactionType,transactionAmount,
                                 transactionBalance,transactionCategory,transactionDescription,transactionMemo);

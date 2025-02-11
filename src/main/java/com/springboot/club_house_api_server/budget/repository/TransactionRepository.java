@@ -63,8 +63,17 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     @Query("SELECT COUNT(t) > 0 FROM TransactionEntity t " +
             "WHERE t.account = :account " +
             "AND t.club = :club " +
-            "AND t.transactionDate = :transactionDate")
+            "AND DATE_FORMAT(t.transactionDate, '%Y-%m-%d %H:%i:%s') = DATE_FORMAT(:transactionDate, '%Y-%m-%d %H:%i:%s')")
     boolean isAlreadySavedTransaction(@Param("account") ClubAccountEntity account,
-                               @Param("club") ClubEntity club,
-                               @Param("parsedDate") LocalDateTime transactionDate);
+                                      @Param("club") ClubEntity club,
+                                      @Param("transactionDate") LocalDateTime transactionDate);
+
+    @Query("SELECT COUNT(t) FROM TransactionEntity t " +
+            "WHERE t.account = :account " +
+            "AND t.club = :club " +
+            "AND DATE_FORMAT(t.transactionDate, '%Y-%m-%d %H:%i:%s') = DATE_FORMAT(:transactionDate, '%Y-%m-%d %H:%i:%s')")
+    long countExistingTransactions(@Param("account") ClubAccountEntity account,
+                                   @Param("club") ClubEntity club,
+                                   @Param("transactionDate") LocalDateTime transactionDate);
+
 }
