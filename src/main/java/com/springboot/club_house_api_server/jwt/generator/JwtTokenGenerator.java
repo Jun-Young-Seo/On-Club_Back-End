@@ -57,6 +57,8 @@ public class JwtTokenGenerator {
         }
         return true;
     }
+    //클레임 파싱 메서드
+
     private Claims parseClaims(String accessToken) {
         try{
             return Jwts.parser().setSigningKey(key).parseClaimsJws(accessToken).getBody();
@@ -65,9 +67,9 @@ public class JwtTokenGenerator {
             return e.getClaims();
         }
     }
-    public String createToken(String userTel, String role, long expireTime){
+    public String createToken(String userId, String role, long expireTime){
         return Jwts.builder()
-                .setSubject(userTel)
+                .setSubject(userId)
                 .claim("auth",role)
                 .setIssuedAt(new Date())
                 //1hour 유효기간

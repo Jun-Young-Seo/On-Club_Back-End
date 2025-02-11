@@ -1,12 +1,15 @@
 package com.springboot.club_house_api_server.budget.repository;
 
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
+import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
+import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -55,4 +58,13 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     // 12. 클럽 이름과 거래 유형(입금/출금)으로 거래 내역 조회
     @Query("SELECT t FROM TransactionEntity t WHERE t.club.clubName = :clubName AND t.transactionCategory = :category")
     List<TransactionEntity> findByClubNameAndCategory(@Param("clubName") String clubName, @Param("category") String category);
+
+    //이미 DB에 거래내역이 있는 경우 추가하지 않기 위한 bool 메서드
+    @Query("SELECT COUNT(t) > 0 FROM TransactionEntity t " +
+            "WHERE t.account = :account " +
+            "AND t.club = :club " +
+            "AND t.transactionDate = :transactionDate")
+    boolean isAlreadySavedTransaction(@Param("account") ClubAccountEntity account,
+                               @Param("club") ClubEntity club,
+                               @Param("parsedDate") LocalDateTime transactionDate);
 }
