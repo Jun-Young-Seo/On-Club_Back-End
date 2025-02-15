@@ -1,5 +1,6 @@
 package com.springboot.club_house_api_server.club.service;
 
+import com.springboot.club_house_api_server.club.dto.SearchClubResponseDto;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +22,8 @@ public class ClubService {
     private final ClubRepository clubRepository;
 
     //모든 클럽 조회 메서드
+    //이 메서드는 사용자 가입 여부와 관계 없이 모든 클럽 반환 --> FE 렌더링용
+    //ex) 모든 동호회 살펴보기
     public ResponseEntity<?> getAllClubs() {
         List<ClubEntity> clubs = clubRepository.findAll();
         if (clubs.isEmpty()) {
@@ -69,5 +73,29 @@ public class ClubService {
             userInfos.add(userInfo);
         }
         return ResponseEntity.ok(userInfos);
+    }
+
+//    private long club_id;
+//    private String clubName;
+//    private String clubDescription;
+//    private String clubLogoURL;
+//    private String clubBackgroundImageURL;
+//    private LocalDateTime clubWhenCreated;
+
+    public ResponseEntity<?> findAllClubsByUserId(long userId){
+        List<ClubEntity> allClubs = clubRepository.findClubsByUserId(userId);
+        List<SearchClubResponseDto> result = new ArrayList<>();
+        for(ClubEntity club : allClubs) {
+            SearchClubResponseDto responseDto = new SearchClubResponseDto();
+            responseDto.setClub_id(club.getClubId());
+            responseDto.setClubName(club.getClubName());
+            responseDto.setClubDescription(club.getClubDescription());
+            responseDto.setClubLogoURL(club.getClubLogoURL());
+            responseDto.setClubBackgroundImageURL(club.getClubBackgroundURL());
+            responseDto.setClubWhenCreated(club.getClubCreatedAt());
+
+            result.add(responseDto);
+        }
+        return ResponseEntity.ok(result);
     }
 }
