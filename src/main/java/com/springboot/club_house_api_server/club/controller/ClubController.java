@@ -36,4 +36,9 @@ public class ClubController {
     public ResponseEntity<?> findAllMembers(@RequestParam long clubId){
         return clubService.findAllClubMembers(clubId);
     }
+    //유저 ID로 가입한 모든 동호회 조회
+    @GetMapping("/find/by-user_id")
+    public ResponseEntity<?> findClubByUserId(@RequestParam long userId){
+        return clubService.findAllClubsByUserId(userId);
+    }
 }
