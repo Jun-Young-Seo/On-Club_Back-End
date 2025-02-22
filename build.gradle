@@ -44,6 +44,10 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    //For Data Visualization CHart
+    implementation 'org.knowm.xchart:xchart:3.8.1'
+
 }
 
 tasks.named('test') {
