@@ -67,7 +67,7 @@ public class TransactionEntity {
     public TransactionEntity(ClubAccountEntity account, ClubEntity club, LocalDateTime transactionDate,
                              String transactionType, int transactionAmount, int transactionBalance,
                              String transactionCategory, String transactionDescription,
-                             String transactionMemo) {
+                             String transactionMemo, String transactionDetail) {
         this.account = account;
         this.club = club;
         this.transactionDate = transactionDate;
@@ -77,6 +77,7 @@ public class TransactionEntity {
         this.transactionCategory = transactionCategory;
         this.transactionDescription = transactionDescription;
         this.transactionMemo = transactionMemo;
+        this.transactionDetail=transactionDetail;
     }
 
 }
