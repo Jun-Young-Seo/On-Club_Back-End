@@ -30,10 +30,10 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class BudgetService {
-    private final AccountRepository accountRepository;
-    private final ClubRepository clubRepository;
-    private final TransactionRepository transactionRepository;
-
+    private final AccountRepository accountRepository; //계좌 레포
+    private final ClubRepository clubRepository; //클럽 레포
+    private final TransactionRepository transactionRepository; //거래내역 레포
+    private final CategorizationService categorizationService; //GPT 거래내역 분류 서비스
     public ResponseEntity<?> readBudgetExcel(ExcelDto requestDto) {
         int firstRowNum = 12; //카카오뱅크 내보내기 엑셀 파일은 12행부터 데이터가 시작됨
         List<TransactionEntity> transactionEntityList = new ArrayList<>(); //save All 호출용 리스트
@@ -82,10 +82,8 @@ public class BudgetService {
                     LocalDateTime parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
                     //DB에 이미 저장되어 있는 거래내역인지 먼저 체크
                     boolean alreadySaved = transactionRepository.isAlreadySavedTransaction(account,club,parsedDate);
-                    System.out.println(alreadySaved);
                     //있다면 루프 건너뛰기
                     if(alreadySaved){
-                        System.out.println(parsedDate+" Already Saved!");
                         continue;
                     }
                     for(Cell cell : row) {
@@ -98,11 +96,12 @@ public class BudgetService {
 //                        parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
                         //없는 경우에만 저장
                         TransactionEntity oneRow = new TransactionEntity(account, club, parsedDate,transactionType,transactionAmount,
-                                transactionBalance,transactionCategory,transactionDescription,transactionMemo);
+                                transactionBalance,transactionCategory,transactionDescription,transactionMemo,null);
 
                         transactionEntityList.add(oneRow);
                     }
                 }
+                transactionEntityList = categorizationService.categorizeTransactions(transactionEntityList);
                 transactionRepository.saveAll(transactionEntityList);
                 return ResponseEntity.ok("DB에 저장 완료");
             }

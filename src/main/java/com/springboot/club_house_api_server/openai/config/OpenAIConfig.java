@@ -10,6 +10,12 @@ import org.springframework.web.client.RestTemplate;
 public class OpenAIConfig {
     @Value("${openai.api.key}")
     private String openAIApiKey;
+
+    @Value("${openai.api.url}")
+    private String openAIURL;
+
+    @Value("${openai.model}")
+    private String openAIModel;
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
