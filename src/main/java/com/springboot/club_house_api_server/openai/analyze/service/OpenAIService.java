@@ -1,13 +1,12 @@
-package com.springboot.club_house_api_server.openai.service;
+package com.springboot.club_house_api_server.openai.analyze.service;
 
-import com.springboot.club_house_api_server.openai.dto.CustomRequestDto;
-import com.springboot.club_house_api_server.openai.dto.MessageDto;
-import com.springboot.club_house_api_server.openai.dto.ResponseDto;
+import com.springboot.club_house_api_server.openai.analyze.dto.CustomRequestDto;
+import com.springboot.club_house_api_server.openai.analyze.dto.MessageDto;
+import com.springboot.club_house_api_server.openai.analyze.dto.ResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service

@@ -39,6 +39,7 @@ dependencies {
     //mySQL Connector -> Local
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -47,6 +48,10 @@ dependencies {
 
     //For Data Visualization CHart
     implementation 'org.knowm.xchart:xchart:3.8.1'
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind'  // JSON 처리
+    implementation 'org.springframework.boot:spring-boot-starter-json'  // JSON 처리 관련
+    implementation 'org.springframework.boot:spring-boot-starter-aop'  // AOP 기능
 
 }
 
