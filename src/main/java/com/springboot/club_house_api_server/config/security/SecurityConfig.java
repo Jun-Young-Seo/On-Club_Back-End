@@ -37,7 +37,7 @@ public class SecurityConfig {
                 //login Endpoint 만들면 수정하기
                 //ex)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/user/login","/api/user/join", "/api/user/logout","/api/meeting/upload").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
+                        .requestMatchers("/api/user/login","/api/user/join", "/api/user/logout","/bot/audio-to-text","/bot/text-to-summary").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
                         .requestMatchers("/api/user/**").hasRole("USER")
                         .anyRequest().permitAll()
                 )

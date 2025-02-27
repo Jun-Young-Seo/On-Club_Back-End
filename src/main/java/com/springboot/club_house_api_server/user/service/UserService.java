@@ -45,12 +45,14 @@ public class UserService {
         }
         long accessTokenValidity = 1000 * 60 * 15 ; // 15분 - accessToken
         long refreshTokenValidity = 1000 * 60 * 60; // 1시간 - RefreshToken
-
-        String accessToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",accessTokenValidity);
-        String refreshToken = jwtTokenGenerator.createToken(loginRequestDto.getUserTel(), "ROLE_USER",refreshTokenValidity);
+        long userId = user.get().getUserId();
+        //setSubject는 String형으로 받으므로 valueOf
+        String accessToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER",accessTokenValidity);
+        String refreshToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER",refreshTokenValidity);
+        String userTel = loginRequestDto.getUserTel();
         user.get().setRefreshToken(refreshToken);
         userRepository.save(user.get());
-        return new LoginResponseDto(accessToken, refreshToken);
+        return new LoginResponseDto(userTel,accessToken, refreshToken);
     }
 
     //refresh Token
@@ -67,10 +69,11 @@ public class UserService {
         if(!user.get().getRefreshToken().equals(refreshToken)){
             throw new IllegalArgumentException("위조된 토큰일 수 있습니다.");
         }
+        long userId = user.get().getUserId();
         long accessTokenValidity = 1000 * 60 * 15;
-        String newAccessToken = jwtTokenGenerator.createToken(userTel, "ROLE_USER", accessTokenValidity);
+        String newAccessToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER", accessTokenValidity);
 
-        return new LoginResponseDto(newAccessToken, refreshToken);
+        return new LoginResponseDto(newAccessToken, refreshToken, userTel);
     }
 
     public String logout(String refreshToken){
