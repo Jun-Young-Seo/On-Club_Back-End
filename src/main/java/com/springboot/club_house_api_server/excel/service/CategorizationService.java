@@ -3,7 +3,7 @@ package com.springboot.club_house_api_server.excel.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
-import com.springboot.club_house_api_server.openai.service.OpenAIService;
+import com.springboot.club_house_api_server.openai.analyze.service.OpenAIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

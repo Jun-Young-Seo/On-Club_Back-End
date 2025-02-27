@@ -16,6 +16,7 @@ public class OpenAIConfig {
 
     @Value("${openai.model}")
     private String openAIModel;
+
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
