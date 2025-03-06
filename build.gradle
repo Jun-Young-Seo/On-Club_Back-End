@@ -53,6 +53,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-json'  // JSON 처리 관련
     implementation 'org.springframework.boot:spring-boot-starter-aop'  // AOP 기능
 
+    //For aws S3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
 }
 
 tasks.named('test') {
