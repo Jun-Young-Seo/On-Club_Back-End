@@ -45,6 +45,11 @@ jobs:
               ddl-auto: update
         jwt:
           secret: "${{ secrets.JWT_SECRET_KEY }}"
+        openai:
+          api:
+            url: "${{ secrets.OPEN_AI_API_URL }}"
+            key: "${{ secrets.OPEN_AI_API_KEY }}"
+
         EOF
       shell: bash
 
