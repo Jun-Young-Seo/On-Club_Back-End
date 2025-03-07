@@ -38,6 +38,7 @@ jobs:
 
     # Environment variables section
     - name: Build with Gradle Wrapper
+      run: ./gradlew build
       env:
         OPEN_AI_API_KEY: ${{ secrets.OPEN_AI_API_KEY }}
         OPEN_AI_API_URL: ${{ secrets.OPEN_AI_API_URL }}
