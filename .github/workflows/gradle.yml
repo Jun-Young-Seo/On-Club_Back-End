@@ -46,7 +46,7 @@ jobs:
         AWS_CREDENTIALS_SECRET_KEY: ${{ secrets.AWS_CREDENTIALS_SECRET_KEY }}
         AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
         DB_URL: ${{ secrets.DB_URL }}
-        DB_USER_NAME: ${{ secrets.DB_NAME }}
+        DB_USER_NAME: ${{ secrets.DB_USER_NAME }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
