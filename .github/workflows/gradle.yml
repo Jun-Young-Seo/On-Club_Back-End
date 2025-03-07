@@ -35,12 +35,19 @@ jobs:
     
     - name: Grant execute permission for Gradle Wrapper
       run: chmod +x ./gradlew
-
-    - name: Debug environment variables
+    
+    - name: Generate application.yml
       run: |
-        echo "DB_URL=${{ secrets.DB_URL }}"
-        echo "DB_USER_NAME=${{ secrets.DB_USER_NAME }}"
-        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
+        echo "spring:" > src/main/resources/application.yml
+        echo "  datasource:" >> src/main/resources/application.yml
+        echo "    url: ${{ secrets.DB_URL }}" >> src/main/resources/application.yml
+        echo "    username: ${{ secrets.DB_USER_NAME }}" >> src/main/resources/application.yml
+        echo "    password: ${{ secrets.DB_PASSWORD }}" >> src/main/resources/application.yml
+        echo "    driver-class-name: com.mysql.cj.jdbc.Driver" >> src/main/resources/application.yml
+        echo "  jpa:" >> src/main/resources/application.yml
+        echo "    database-platform: org.hibernate.dialect.MySQL8Dialect" >> src/main/resources/application.yml
+        echo "    hibernate:" >> src/main/resources/application.yml
+        echo "      ddl-auto: update" >> src/main/resources/application.yml
 
     # Environment variables section
     - name: Build with Gradle Wrapper
