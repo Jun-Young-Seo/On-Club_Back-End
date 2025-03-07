@@ -28,15 +28,6 @@ jobs:
     - name: Grant execute permission for Gradle Wrapper
       run: chmod +x ./gradlew
 
-    # 환경 변수 확인
-    - name: Debug environment variables
-      run: |
-        echo "DB_URL=${{ secrets.DB_URL }}"
-        echo "DB_USER_NAME=${{ secrets.DB_USER_NAME }}"
-        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
-        echo "AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }}"
-        echo "Checking application.yml contents:"
-        cat src/main/resources/application.yml || echo "No application.yml found!"
 
     # application.yml 생성
     - name: Generate application.yml
@@ -52,6 +43,8 @@ jobs:
             database-platform: org.hibernate.dialect.MySQL8Dialect
             hibernate:
               ddl-auto: update
+        jwt:
+          secret: "${{ secrets.JWT_SECRET_KEY }}"
         EOF
       shell: bash
 
