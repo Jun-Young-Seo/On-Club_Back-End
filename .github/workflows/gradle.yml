@@ -36,8 +36,17 @@ jobs:
     - name: Grant execute permission for Gradle Wrapper
       run: chmod +x ./gradlew
 
+    # Environment variables section
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      env:
+        OPEN_AI_API_KEY: ${{ secrets.OPEN_AI_API_KEY }}
+        OPEN_AI_API_URL: ${{ secrets.OPEN_AI_API_URL }}
+        AWS_CREDENTIALS_ACCESS_KEY: ${{ secrets.AWS_CREDENTIALS_ACCESS_KEY }}
+        AWS_CREDENTIALS_SECRET_KEY: ${{ secrets.AWS_CREDENTIALS_SECRET_KEY }}
+        AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+        DB_URL: ${{ secrets.DB_URL }}
+        DB_USER_NAME: ${{ secrets.DB_NAME }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
