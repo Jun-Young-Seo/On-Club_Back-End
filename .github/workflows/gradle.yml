@@ -36,6 +36,12 @@ jobs:
     - name: Grant execute permission for Gradle Wrapper
       run: chmod +x ./gradlew
 
+    - name: Debug environment variables
+      run: |
+        echo "DB_URL=${{ secrets.DB_URL }}"
+        echo "DB_USER_NAME=${{ secrets.DB_USER_NAME }}"
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
+
     # Environment variables section
     - name: Build with Gradle Wrapper
       run: ./gradlew build
