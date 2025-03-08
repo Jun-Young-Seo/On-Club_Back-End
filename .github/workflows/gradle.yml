@@ -27,7 +27,6 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4.0.0
 
-    # ✅ Gradle 빌드 실행 (환경 변수 주입)
     - name: Build with Gradle Wrapper
       env:
         OPEN_AI_API_KEY: ${{ secrets.OPEN_AI_API_KEY }}
@@ -40,17 +39,14 @@ jobs:
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: ./gradlew build -x test
 
-    # ✅ Docker Hub 로그인 (Gradle 빌드 성공 시에만 실행)
     - name: Log in to Docker Hub
       if: success()
       run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-    # ✅ Docker 이미지 빌드 (Gradle 빌드 성공 시에만 실행)
     - name: Build Docker Image
       if: success()
       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest .
 
-    # ✅ Docker Hub에 푸시 (Gradle 빌드 성공 시에만 실행)
     - name: Push Docker Image
       if: success()
       run: docker push ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest
