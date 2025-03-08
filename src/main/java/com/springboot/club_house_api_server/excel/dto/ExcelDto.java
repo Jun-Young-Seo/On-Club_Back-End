@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class ExcelDto {
+    private long userId;
     private long accountId;
     private long clubId;
     private String excelFilePassword;
