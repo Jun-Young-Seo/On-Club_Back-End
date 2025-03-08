@@ -52,7 +52,7 @@ jobs:
         # OpenAI API
         openai.api.key=$(echo "${{ secrets.OPEN_AI_API_KEY }}" | tr -d '\n')
         openai.api.url=${{ secrets.OPEN_AI_API_URL }}
-        openai.model=${{ secrets.OPEN_AI_API_MODEL }}
+        openai.model=${{ secrets.OPEN_AI_MODEL }}
         
         # Whisper API
         whisper.api.url=https://api.openai.com/v1/chat/completions
