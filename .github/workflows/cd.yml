@@ -17,6 +17,11 @@ jobs:
       contents: read
 
     steps:
+    - name: Save EC2 Private Key
+      run: |
+        echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
+        chmod 600 ec2-key.pem
+
     - name: SSH into EC2 & Deploy
       run: |
         ssh -o StrictHostKeyChecking=no -i ec2-key.pem $EC2_USER@$EC2_HOST << EOF
