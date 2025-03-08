@@ -48,12 +48,12 @@ jobs:
     # ✅ Docker 이미지 빌드 (Gradle 빌드 성공 시에만 실행)
     - name: Build Docker Image
       if: success()
-      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/clubhouse-api:latest .
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest .
 
     # ✅ Docker Hub에 푸시 (Gradle 빌드 성공 시에만 실행)
     - name: Push Docker Image
       if: success()
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/clubhouse-api:latest
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest
 
   dependency-submission:
     runs-on: ubuntu-latest
