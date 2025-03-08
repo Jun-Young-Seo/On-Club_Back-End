@@ -32,31 +32,31 @@ jobs:
       run: |
         cat <<EOF > src/main/resources/application.properties
         spring.application.name=Club_House_API_Server
-
+        
         # Database
         spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
         spring.datasource.url=${{ secrets.DB_URL }}
         spring.datasource.username=${{ secrets.DB_USER_NAME }}
         spring.datasource.password=${{ secrets.DB_PASSWORD }}
-
+        
         # JPA
         spring.jpa.hibernate.ddl-auto=update
         spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
         spring.jpa.show-sql=false
         spring.jpa.format-sql=true
-
+        
         # JWT
         jwt.secret=${{ secrets.JWT_SECRET_KEY }}
         jwt.expire=3600000
-
+        
         # OpenAI API
-        openai.api.key=${{ secrets.OPEN_AI_API_KEY }}
+        openai.api.key=$(echo "${{ secrets.OPEN_AI_API_KEY }}" | tr -d '\n')
         openai.api.url=${{ secrets.OPEN_AI_API_URL }}
-        openai.model=gpt-4o-mini
-
+        openai.model=${{ secrets.OPEN_AI_API_MODEL }}
+        
         # Whisper API
         whisper.api.url=https://api.openai.com/v1/chat/completions
-
+        
         # S3
         cloud.aws.credentials.access-key=${{ secrets.AWS_CREDENTIALS_ACCESS_KEY }}
         cloud.aws.credentials.secret-key=${{ secrets.AWS_CREDENTIALS_SECRET_KEY }}
