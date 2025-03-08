@@ -30,7 +30,7 @@ public class S3Service {
     private String bucket;
 
     public String uploadFile(S3UploadDto dto) throws IOException {
-        MultipartFile image = dto.getFile();
+        MultipartFile file = dto.getFile();
         long clubId = dto.getClubId();
         long userId = dto.getUserId();
         String scenario = dto.getScenario();
@@ -45,29 +45,29 @@ public class S3Service {
         String now = LocalDateTime.now().format(dateTimeFormatter);
         switch (scenario){
             case "logo":
-                fileName="logo_"+clubName+"_"+now+"_"+userId+"_"+image.getOriginalFilename();
+                fileName="logo_"+clubName+"_"+now+"_"+userId+"_"+file.getOriginalFilename();
                 break;
             case "background":
-                fileName="background_"+clubName+"_"+now+"_"+userId+"_"+image.getOriginalFilename();
+                fileName="background_"+clubName+"_"+now+"_"+userId+"_"+file.getOriginalFilename();
                 break;
             case "budget":
-                fileName="budget_"+clubName+"_"+now+"_"+userId+"_"+image.getOriginalFilename();
+                fileName="budget_"+clubName+"_"+now+"_"+userId+"_"+file.getOriginalFilename();
                 break;
             case "userlist":
-                fileName="userlist_"+clubName+"_"+now+"_"+userId+"_"+image.getOriginalFilename();
+                fileName="userlist_"+clubName+"_"+now+"_"+userId+"_"+file.getOriginalFilename();
                 break;
             default:
-                fileName="etc_"+clubName+"_"+now+"_"+userId+"_"+image.getOriginalFilename();
+                fileName="etc_"+clubName+"_"+now+"_"+userId+"_"+file.getOriginalFilename();
                 break;
         }
 
         // 메타데이터 설정
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(image.getContentType());
-        metadata.setContentLength(image.getSize());
+        metadata.setContentType(file.getContentType());
+        metadata.setContentLength(file.getSize());
 
         // S3에 파일 업로드 요청 생성
-        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, fileName, image.getInputStream(), metadata);
+        PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata);
         String fileURL = getPublicUrl(fileName);
 
         // S3에 파일 업로드

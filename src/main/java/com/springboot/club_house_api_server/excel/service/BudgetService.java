@@ -6,7 +6,12 @@ import com.springboot.club_house_api_server.budget.repository.TransactionReposit
 import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
+import com.springboot.club_house_api_server.club_data.entity.ClubDataEntity;
 import com.springboot.club_house_api_server.excel.dto.ExcelDto;
+import com.springboot.club_house_api_server.s3.dto.S3UploadDto;
+import com.springboot.club_house_api_server.s3.service.S3Service;
+import com.springboot.club_house_api_server.user.entity.UserEntity;
+import com.springboot.club_house_api_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.poifs.crypt.Decryptor;
@@ -34,6 +39,9 @@ public class BudgetService {
     private final ClubRepository clubRepository; //클럽 레포
     private final TransactionRepository transactionRepository; //거래내역 레포
     private final CategorizationService categorizationService; //GPT 거래내역 분류 서비스
+    private final S3Service s3Service;
+    private final UserRepository userRepository;
+
     public ResponseEntity<?> readBudgetExcel(ExcelDto requestDto) {
         int firstRowNum = 12; //카카오뱅크 내보내기 엑셀 파일은 12행부터 데이터가 시작됨
         List<TransactionEntity> transactionEntityList = new ArrayList<>(); //save All 호출용 리스트
@@ -57,7 +65,12 @@ public class BudgetService {
         if (!originalFilename.endsWith(".xlsx")) {
             response = excelException(HttpStatus.BAD_REQUEST,".xlsx 확장자 파일만 업로드 할 수 있습니다.");
         }
-
+        //S3업로드를 위한 예외처리 우선
+        long userId = requestDto.getUserId();
+        Optional<UserEntity> userEntity = userRepository.findById(userId);
+        if(userEntity.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("userId에 해당하는 유저가 없습니다.");
+        }
         try (InputStream fis = file.getInputStream();
              POIFSFileSystem fs = new POIFSFileSystem(fis)) {
 
@@ -103,6 +116,16 @@ public class BudgetService {
                 }
                 transactionEntityList = categorizationService.categorizeTransactions(transactionEntityList);
                 transactionRepository.saveAll(transactionEntityList);
+
+                //S3 업로드 로직 시작
+                S3UploadDto s3UploadDto= new S3UploadDto(club.getClubId(),userId,"budget",file);
+                String filePublicUrl = s3Service.uploadFile(s3UploadDto);
+                dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+                String now = LocalDateTime.now().format(dateTimeFormatter);
+
+                String fileName="budget_"+club.getClubName()+"_"+now+"_"+userId+"_"+file.getOriginalFilename();
+
+                s3Service.saveClubData(club.getClubId(),filePublicUrl,fileName,LocalDateTime.now(),userId,"budget");
                 return ResponseEntity.ok("DB에 저장 완료");
             }
 
