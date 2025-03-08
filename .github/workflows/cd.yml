@@ -22,14 +22,21 @@ jobs:
         echo "$EC2_KEY" > ec2-key.pem
         chmod 600 ec2-key.pem
         ssh -o StrictHostKeyChecking=no -i ec2-key.pem $EC2_USER@$EC2_HOST << EOF
-          sudo apt update
-          sudo apt install -y docker-compose-plugin
+          # ✅ Docker Compose 설치 확인
+          if ! command -v docker-compose &> /dev/null; then
+            sudo apt update
+            sudo apt install -y docker-compose-plugin
+          fi
 
+          # ✅ Docker Hub 로그인
           echo "${{ secrets.DOCKER_PAT }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+          # ✅ 최신 Docker 이미지 가져오기
           docker pull ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest
 
-          docker-compose down || true
+          # ✅ 기존 컨테이너 중지 및 삭제
+          docker compose down || true
 
-          docker-compose up -d
+          # ✅ 새로운 컨테이너 실행
+          docker compose up -d
         EOF
