@@ -1,0 +1,32 @@
+name: CD - Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["CD - Build & Push Docker Image"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: SSH into EC2 & Deploy
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_KEY: ${{ secrets.EC2_KEY }}
+      run: |
+        echo "$EC2_KEY" > ec2-key.pem
+        chmod 600 ec2-key.pem
+        ssh -o StrictHostKeyChecking=no -i ec2-key.pem $EC2_USER@$EC2_HOST << EOF
+          # 최신 Docker 이미지 가져오기
+          docker pull ${{ secrets.DOCKER_USERNAME }}/onclub:latest
+          
+          docker-compose down
+          
+          # 새로운 컨테이너 실행
+          docker-compose up -d
+        EOF
