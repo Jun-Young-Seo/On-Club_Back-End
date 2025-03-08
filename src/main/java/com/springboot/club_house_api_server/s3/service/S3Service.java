@@ -68,14 +68,16 @@ public class S3Service {
 
         // S3에 파일 업로드 요청 생성
         PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata);
-        String fileURL = getPublicUrl(fileName);
-
         // S3에 파일 업로드
         try {
             amazonS3.putObject(putObjectRequest);
         }catch (Exception e){
             return "오류 발생 "+e;
         }
+
+        String fileURL = getPublicUrl(fileName);
+        System.out.println("url : "+fileURL);
+
 
         saveClubData(clubId, fileURL, fileName, LocalDateTime.now(), userId, scenario);
         return fileURL;
@@ -102,7 +104,7 @@ public class S3Service {
     }
 
     private String getPublicUrl(String fileName) {
-        return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, amazonS3.getRegionName(), fileName);
+        return amazonS3.getUrl(bucket, fileName).toString();
     }
 
 }
