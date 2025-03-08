@@ -5,10 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,15 +30,24 @@ jobs:
     - name: Copy application-template.properties to application.properties
       run: cp src/main/resources/application-template.properties src/main/resources/application.properties
 
-    # ✅ 환경 변수 설정 (secrets 주입)
-    - name: Export environment variables
+    # ✅ 환경 변수 설정 (secrets를 직접 `env`에 주입)
+    - name: Set environment variables
+      env:
+        DB_URL: ${{ secrets.DB_URL }}
+        DB_USER_NAME: ${{ secrets.DB_USER_NAME }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+        OPEN_AI_API_KEY: ${{ secrets.OPEN_AI_API_KEY }}
+        OPEN_AI_API_URL: ${{ secrets.OPEN_AI_API_URL }}
+
+    # ✅ 환경 변수 디버깅
+    - name: Debug environment variables
       run: |
-        export DB_URL="${{ secrets.DB_URL }}"
-        export DB_USER_NAME="${{ secrets.DB_USER_NAME }}"
-        export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
-        export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
-        export OPEN_AI_API_KEY="${{ secrets.OPEN_AI_API_KEY }}"
-        export OPEN_AI_API_URL="${{ secrets.OPEN_AI_API_URL }}"
+        echo "DB_URL=$DB_URL"
+        echo "DB_USER_NAME=$DB_USER_NAME"
+        echo "DB_PASSWORD=$DB_PASSWORD"
+        echo "Checking application.properties contents:"
+        cat src/main/resources/application.properties || echo "No application.properties found!"
 
     # ✅ Gradle 빌드 실행
     - name: Build with Gradle Wrapper
