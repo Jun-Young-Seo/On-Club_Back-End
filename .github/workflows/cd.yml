@@ -2,7 +2,7 @@ name: CD - Deploy to EC2
 
 on:
   workflow_run:
-    workflows: ["Java CI/CD with Gradle & Docker"]  # ✅ CI와 연동
+    workflows: ["Java CI/CD with Gradle & Docker"]
     types:
       - completed
 
@@ -37,6 +37,6 @@ jobs:
           # ✅ 기존 컨테이너 중지 및 삭제
           docker compose down || true
 
-          # ✅ 새로운 컨테이너 실행
+          # ✅ 새로운 컨테이너 실행 (환경 변수 없이 실행)
           docker compose up -d
         EOF
