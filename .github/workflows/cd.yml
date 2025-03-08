@@ -2,7 +2,7 @@ name: CD - Deploy to EC2
 
 on:
   workflow_run:
-    workflows: ["Java CI/CD with Gradle & Docker"]
+    workflows: ["Java CI/CD with Gradle & Docker"]  # ✅ CI와 연동
     types:
       - completed
 
@@ -22,11 +22,14 @@ jobs:
         echo "$EC2_KEY" > ec2-key.pem
         chmod 600 ec2-key.pem
         ssh -o StrictHostKeyChecking=no -i ec2-key.pem $EC2_USER@$EC2_HOST << EOF
-          # 최신 Docker 이미지 가져오기
-          docker pull ${{ secrets.DOCKER_USERNAME }}/onclub:latest
-          
-          docker-compose down
-          
-          # 새로운 컨테이너 실행
+          sudo apt update
+          sudo apt install -y docker-compose-plugin
+
+          echo "${{ secrets.DOCKER_PAT }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+          docker pull ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest
+
+          docker-compose down || true
+
           docker-compose up -d
         EOF
