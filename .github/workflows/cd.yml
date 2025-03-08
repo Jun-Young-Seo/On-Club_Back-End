@@ -31,13 +31,14 @@ jobs:
     - name: SSH into EC2 & Deploy
       run: |
         ssh -o StrictHostKeyChecking=no -i ec2-key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
-          echo "✅ EC2 접속 성공!"
+          echo "EC2 접속 성공!"
           docker pull ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest
 
-          # ✅ 기존 컨테이너 중지 및 삭제
+          #  기존 컨테이너 중지 및 삭제
           docker stop onclub-api || true
           docker rm onclub-api || true
+          docker images | grep "onclub-api" | awk '{print $3}' | tail -n +2 | xargs -r docker rmi -f
 
-          # ✅ 새로운 컨테이너 실행
+          #  새로운 컨테이너 실행
           docker run -d --name onclub-api -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest
         EOF
