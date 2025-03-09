@@ -5,6 +5,8 @@ import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.event.dto.ClubEventDto;
 import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
+import com.springboot.club_house_api_server.user.entity.UserEntity;
+import com.springboot.club_house_api_server.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.Optional;
 public class ClubEventService {
     private final ClubEventRepository clubEventRepository;
     private final ClubRepository clubRepository;
+    private final UserRepository userRepository;
 
     //이벤트 추가하기
     public ResponseEntity<?> addEvent(long clubId, LocalDateTime startTime, LocalDateTime endTime, String description){
@@ -79,6 +82,49 @@ public class ClubEventService {
         List<ClubEventDto> response = new ArrayList<>();
         for(ClubEventEntity event : events){
             ClubEventDto dto = new ClubEventDto(event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
+            response.add(dto);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    //사용자가 소속된 모든 클럽의 이벤트 조회
+    public ResponseEntity<?> getAllEventsWhereUserJoined( long userId){
+        Optional<UserEntity> userOpt = userRepository.findById(userId);
+        if(userOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(userId+"에 해당하는 user가 없습니다.");
+        }
+        List<ClubEventEntity> events = clubEventRepository.findAllEventsByUserId(userId);
+        List<ClubEventDto> response = new ArrayList<>();
+        for(ClubEventEntity event : events){
+            ClubEventDto dto = new ClubEventDto(event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
+            response.add(dto);
+        }
+        return ResponseEntity.ok(response);
+    }
+    //사용자가 소속된 모든 클럽의 이벤트 조회 + 시간으로 조회 쿼리
+    public ResponseEntity<?> getEventsByUserAndDateRange(long userId, LocalDateTime startDate, LocalDateTime endDate) {
+        // 유저 확인
+        Optional<UserEntity> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(userId + "에 해당하는 user가 없습니다.");
+        }
+
+        // 이벤트 조회
+        List<ClubEventEntity> events = clubEventRepository.findEventsByUserIdWithinDateRange(userId, startDate, endDate);
+        if (events.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("해당 기간 동안 사용자가 참여한 이벤트가 없습니다.");
+        }
+
+        // DTO 변환
+        List<ClubEventDto> response = new ArrayList<>();
+        for (ClubEventEntity event : events) {
+            ClubEventDto dto = new ClubEventDto(
+                    event.getClub().getClubId(),
+                    event.getEventStartTime(),
+                    event.getEventEndTime(),
+                    event.getEventDescription()
+            );
             response.add(dto);
         }
 

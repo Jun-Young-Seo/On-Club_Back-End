@@ -45,4 +45,18 @@ public class ClubEventController {
             @RequestParam("keyWord")String keyWord) {
             return clubEventService.getEventsByClubAndDateAndKeyword(clubId, eventStartTime, eventEndTime, keyWord);
     }
+
+    @GetMapping("/get-event/user_id")
+    public ResponseEntity<?> getAllEventsWhereUserJoined(@RequestParam("userId") long userId){
+        return clubEventService.getAllEventsWhereUserJoined(userId);
+    }
+
+    @GetMapping("/get-event/user_id_and_date")
+    public ResponseEntity<?> getUserEventsWithinDateRange(
+            @RequestParam("userId") long userId,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        return clubEventService.getEventsByUserAndDateRange(userId, startDate, endDate);
+    }
+
 }
