@@ -36,5 +36,21 @@ public interface ClubEventRepository extends JpaRepository<ClubEventEntity,Long>
             @Param("keyword") String keyword
     );
 
+    //사용자가 소속된 모든 클럽의 이벤트 조회 쿼리
+    @Query("SELECT e FROM ClubEventEntity e " +
+            "JOIN e.club c " +
+            "JOIN MembershipEntity m ON m.club.clubId = c.clubId " +
+            "WHERE m.user.userId = :userId")
+    List<ClubEventEntity> findAllEventsByUserId(@Param("userId") Long userId);
+
+    //사용자가 소속된 모든 클럽의 이벤트 조회 + 시간으로 조회 쿼리
+    @Query("SELECT e FROM ClubEventEntity e " +
+            "JOIN e.club c " +
+            "JOIN MembershipEntity m ON m.club.clubId = c.clubId " +
+            "WHERE m.user.userId = :userId " +
+            "AND e.eventStartTime BETWEEN :startDate AND :endDate")
+    List<ClubEventEntity> findEventsByUserIdWithinDateRange(@Param("userId") Long userId,
+                                                  @Param("startDate") LocalDateTime startDate,
+                                                  @Param("endDate") LocalDateTime endDate);
 
 }
