@@ -14,6 +14,10 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -24,25 +28,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                //HTTP 인증 비활성화
+                // CORS 설정 추가
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // HTTP 인증 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)
-                //CSRF 보호 비활성화
+                // CSRF 보호 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
-                //SPring 기본 로그인 방식 비활성화
+                // Spring 기본 로그인 방식 비활성화
                 .formLogin(AbstractHttpConfigurer::disable)
-                //세션 방식 아니니까 STATELESS
+                // 세션 방식이 아니므로 STATELESS
                 .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                //모든 요청 허용 --> 테스트라서.
-                //login Endpoint 만들면 수정하기
-                //ex)
+                // 모든 요청 허용 (테스트라서.)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/user/login","/api/user/join", "/api/user/logout","/bot/audio-to-text","/bot/text-to-summary").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
+                        .requestMatchers("/api/user/login", "/api/user/join", "/api/user/logout",
+                                "/bot/audio-to-text", "/bot/text-to-summary").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
                         .requestMatchers("/api/user/**").hasRole("USER")
                         .anyRequest().permitAll()
                 )
-                //커스텀 예외 필터 -> 인증 필터로 처리
-                //커스텀 예외 필터에서 만료토큰, 위조토큰 처리
+                // 커스텀 예외 필터 -> 인증 필터로 처리
+                // 커스텀 예외 필터에서 만료 토큰, 위조 토큰 처리
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenGenerator),
                         UsernamePasswordAuthenticationFilter.class
                 )
@@ -54,5 +59,19 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         // BCrypt Encoding
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    //  최신 CORS 설정 (Spring Security 6.1 이상 방식)
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));  //react 로컬 허용--> 나중에 배포후 변경필요
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));  // 모든 헤더 허용
+        configuration.setAllowCredentials(true);  // 쿠키 포함 허용 -- JWT HTTP Only 쿠키로 쓸 예정
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
