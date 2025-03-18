@@ -19,6 +19,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         }//만료 토큰인 경우
         catch(ExpiredJwtException e){
+
             handleException(response,"Expired","토큰이 만료되었습니다.");
         }//Expired의 상위 예외 클래스. 여기 포함되면 변조되었을 수 있음
         catch (JwtException e){
@@ -29,15 +30,16 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
             e.printStackTrace();
         }
     }
-    private void handleException(HttpServletResponse response, String error, String msg){
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        try {
-            response.getWriter().write(String.format("{\"error\": \"%s\", \"message\": \"%s\"}", error, msg));
-        }
-        catch (IOException e) {
-            e.printStackTrace();
+    private void handleException(HttpServletResponse response, String error, String msg) {
+        if (!response.isCommitted()) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            try {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

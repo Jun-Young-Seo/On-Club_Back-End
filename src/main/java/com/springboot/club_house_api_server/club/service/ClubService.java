@@ -24,10 +24,20 @@ public class ClubService {
     //모든 클럽 조회 메서드
     //이 메서드는 사용자 가입 여부와 관계 없이 모든 클럽 반환 --> FE 렌더링용
     //ex) 모든 동호회 살펴보기
-    public ResponseEntity<?> getAllClubs() {
-        List<ClubEntity> clubs = clubRepository.findAll();
-        if (clubs.isEmpty()) {
-            return ResponseEntity.noContent().build();  // HTTP 204 No Content
+
+    public ResponseEntity<List<SearchClubResponseDto>> getAllClubs() {
+        List<SearchClubResponseDto> clubs = new ArrayList<>();
+        List<ClubEntity> clubEntities = clubRepository.findAll();
+        for (ClubEntity club : clubEntities) {
+            SearchClubResponseDto clubDto = new SearchClubResponseDto();
+            clubDto.setClub_id(club.getClubId());
+            clubDto.setClubName(club.getClubName());
+            clubDto.setClubDescription(club.getClubDescription());
+            clubDto.setClubLogoURL(club.getClubLogoURL());
+            clubDto.setClubBackgroundImageURL(club.getClubBackgroundURL());
+            clubDto.setClubWhenCreated(club.getClubCreatedAt());
+
+            clubs.add(clubDto);
         }
         return ResponseEntity.ok(clubs);
     }

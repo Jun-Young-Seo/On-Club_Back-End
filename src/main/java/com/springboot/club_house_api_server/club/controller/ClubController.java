@@ -1,10 +1,14 @@
 package com.springboot.club_house_api_server.club.controller;
 
 import com.springboot.club_house_api_server.club.dto.ClubRequestDto;
+import com.springboot.club_house_api_server.club.dto.SearchClubResponseDto;
+import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.service.ClubService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +27,8 @@ public class ClubController {
     }
 
     @GetMapping("/find/all")
-    public ResponseEntity<?> findAllClubs(){
+    public ResponseEntity<List<SearchClubResponseDto>> findAllClubs(){
+
        return clubService.getAllClubs();
     }
 
