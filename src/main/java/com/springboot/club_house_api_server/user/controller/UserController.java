@@ -62,6 +62,7 @@ public class UserController {
                 .httpOnly(true)
                 .secure(false) // ✅ HTTPS가 아니므로 false (배포 시 true로 변경)
                 .path("/")
+                .domain("43.201.191.12")
                 .sameSite("Lax") // ✅ Cross-Origin 요청에서 필요
                 .maxAge(maxAge)
                 .build();
