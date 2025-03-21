@@ -6,6 +6,8 @@ import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
 import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,13 +45,13 @@ public class UserService {
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.get().getPassword())){
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
-        long accessTokenValidity = 1000 * 60 * 15 ; // 15분 - accessToken
-        long refreshTokenValidity = 1000 * 60 * 60; // 1시간 - RefreshToken
-        long userId = user.get().getUserId();
+        long accessTokenValidity = 1000 * 60 * 15  ; // 15분 - accessToken
+        long refreshTokenValidity = 1000 * 60 * 60; // 1시간 - RefreshToken 확정 후 상수화 할 것
+        String userId = String.valueOf(user.get().getUserId());
         //setSubject는 String형으로 받으므로 valueOf
         String accessToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER",accessTokenValidity);
         String refreshToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER",refreshTokenValidity);
-        String userTel = loginRequestDto.getUserTel();
+
         user.get().setRefreshToken(refreshToken);
         userRepository.save(user.get());
         return new LoginResponseDto(userId,accessToken, refreshToken);
@@ -61,17 +63,17 @@ public class UserService {
             throw new IllegalArgumentException("Invalid Refresh Token");
         }
 
-        String userTel = jwtTokenGenerator.getUserTel(refreshToken);
-        Optional<UserEntity> user = userRepository.findByUserTel(userTel);
+        String userId = jwtTokenGenerator.getUserId(refreshToken);
+        Optional<UserEntity> user = userRepository.findById(Long.valueOf(userId));
         if(!user.isPresent()){
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
         }
         if(!user.get().getRefreshToken().equals(refreshToken)){
             throw new IllegalArgumentException("위조된 토큰일 수 있습니다.");
         }
-        long userId = user.get().getUserId();
-        long accessTokenValidity = 1000 * 60 * 15;
-        String newAccessToken = jwtTokenGenerator.createToken(String.valueOf(userId), "ROLE_USER", accessTokenValidity);
+
+        long accessTokenValidity = 1000 * 60 * 1;
+        String newAccessToken = jwtTokenGenerator.createToken(userId, "ROLE_USER", accessTokenValidity);
 
         return new LoginResponseDto(userId, newAccessToken, refreshToken);
     }
@@ -80,7 +82,7 @@ public class UserService {
         if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
             throw new IllegalArgumentException("Invalid Refresh Token");
         }
-        String userTel = jwtTokenGenerator.getUserTel(refreshToken);
+        String userTel = jwtTokenGenerator.getUserId(refreshToken);
         Optional<UserEntity> user = userRepository.findByUserTel(userTel);
 
         if(!user.isPresent()){

@@ -72,12 +72,11 @@ public class JwtTokenGenerator {
                 .setSubject(userId)
                 .claim("auth",role)
                 .setIssuedAt(new Date())
-                //1hour 유효기간
                 .setExpiration(new Date(System.currentTimeMillis()+ expireTime))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
-    public String getUserTel(String token){
+    public String getUserId(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
