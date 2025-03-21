@@ -60,8 +60,9 @@ public class UserController {
     private void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setPath("/");
+        cookie.setAttribute("SameSite","None");
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
     }
