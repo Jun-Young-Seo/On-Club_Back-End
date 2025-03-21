@@ -85,12 +85,6 @@ public class ClubService {
         return ResponseEntity.ok(userInfos);
     }
 
-//    private long club_id;
-//    private String clubName;
-//    private String clubDescription;
-//    private String clubLogoURL;
-//    private String clubBackgroundImageURL;
-//    private LocalDateTime clubWhenCreated;
 
     public ResponseEntity<?> findAllClubsByUserId(long userId){
         List<ClubEntity> allClubs = clubRepository.findClubsByUserId(userId);
@@ -107,5 +101,13 @@ public class ClubService {
             result.add(responseDto);
         }
         return ResponseEntity.ok(result);
+    }
+
+    public ResponseEntity<?> findClubById(long id){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(id);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("club Id에 해당하는 클럽이 없습니다.");
+        }
+        return ResponseEntity.ok(clubOpt.get());
     }
 }
