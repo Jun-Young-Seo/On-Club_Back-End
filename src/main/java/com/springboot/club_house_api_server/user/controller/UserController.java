@@ -4,8 +4,12 @@ import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
 import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
 import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
 import com.springboot.club_house_api_server.user.service.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +26,11 @@ public class UserController {
     }
     //로그인 엔드포인트
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request){
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request, HttpServletResponse response){
         LoginResponseDto r= userService.login(request);
+        setCookie(response, "accessToken", r.getAccessToken(), 15); // 15분
+        setCookie(response, "refreshToken", r.getRefreshToken(), 60); // 1시간
+
         return ResponseEntity.ok(r);
     }
     //Access Token 재발급 엔드포인트
@@ -47,4 +54,16 @@ public class UserController {
         String logoutMsg = userService.logout(refreshToken);
         return ResponseEntity.ok(logoutMsg);
     }
+
+    //Http-Only Cookie 설정 메소드
+    //2025-03-21 추가
+    private void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(maxAge);
+        response.addCookie(cookie);
+    }
+
 }

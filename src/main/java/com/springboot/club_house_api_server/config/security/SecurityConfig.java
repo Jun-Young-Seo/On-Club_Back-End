@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/login", "/api/user/join", "/api/user/logout",
                                 "/bot/audio-to-text", "/bot/text-to-summary").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
                         .requestMatchers("/api/user/**").hasRole("USER")
+                        .requestMatchers("/api/club/find/all").authenticated()
                         .anyRequest().permitAll()
                 )
                 // 커스텀 예외 필터 -> 인증 필터로 처리
