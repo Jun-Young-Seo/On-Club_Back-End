@@ -28,8 +28,6 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request, HttpServletResponse response){
         LoginResponseDto r= userService.login(request);
-        setCookie(response, "accessToken", r.getAccessToken(), 15); // 15분
-        setCookie(response, "refreshToken", r.getRefreshToken(), 60); // 1시간
 
         return ResponseEntity.ok(r);
     }
@@ -57,17 +55,18 @@ public class UserController {
 
     //Http-Only Cookie 설정 메소드
     //2025-03-21 추가
-    private void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        ResponseCookie cookie = ResponseCookie.from(name, value)
-                .httpOnly(true)
-                .secure(false) // ✅ HTTPS가 아니므로 false (배포 시 true로 변경)
-                .path("/")
-                .domain("43.201.191.12")
-                .sameSite("Lax") // ✅ Cross-Origin 요청에서 필요
-                .maxAge(maxAge)
-                .build();
-
-        response.addHeader("Set-Cookie", cookie.toString());
-    }
+    //SSL 설정 이슈로 보류 ㅠㅠㅠ
+//    private void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
+//        ResponseCookie cookie = ResponseCookie.from(name, value)
+//                .httpOnly(true)
+//                .secure(false) // ✅ HTTPS가 아니므로 false (배포 시 true로 변경)
+//                .path("/")
+//                .domain("43.201.191.12")
+//                .sameSite("Lax") // ✅ Cross-Origin 요청에서 필요
+//                .maxAge(maxAge)
+//                .build();
+//
+//        response.addHeader("Set-Cookie", cookie.toString());
+//    }
 
 }

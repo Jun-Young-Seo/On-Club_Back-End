@@ -26,14 +26,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // JWT 토큰 추출
+        // Authorization 헤더에서 JWT 토큰 추출
+        // SSL 이슈가 해결되면 쿠키에서 추출하는걸로 바꾸기
         String token = resolveToken(request);
-        System.out.println(token);
+
         // 토큰이 존재하고 유효하면 인증 정보 설정
         if (token != null && jwtTokenGenerator.validateToken(token)) {
             Authentication authentication = jwtTokenGenerator.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            System.out.println(authentication.getName());
         }
 
         // 다음 필터로 요청 전달
@@ -41,20 +41,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        System.out.println("resolve Token Calledd");
-        //1차 확인 -> 쿠키에서
-        if(request.getCookies() != null) {
-
-            for (Cookie cookie : request.getCookies()) {
-                System.out.println(cookie.getName());
-                if(cookie.getName().equals("accessToken")){
-                    return cookie.getValue();
-                }
-            }
-        }
-        // 2차 확인
-        // Authorization 헤더에서 Bearer 토큰 추출
-        // Web에선 필요 없지만 iOS 환경을 잘 몰라서 혹시 필요할까봐 남겨둡니다.
+        //Cookie 방식은 SSL이 필용해서 일단 보류...
+//
+//        //1차 확인 -> 쿠키에서
+//        if(request.getCookies() != null) {
+//
+//            for (Cookie cookie : request.getCookies()) {
+//                System.out.println(cookie.getName());
+//                if(cookie.getName().equals("accessToken")){
+//                    return cookie.getValue();
+//                }
+//            }
+//        }
+//      // Authorization 헤더에서 Bearer 토큰 추출
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7); // "Bearer " 이후의 토큰 반환
