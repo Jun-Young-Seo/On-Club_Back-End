@@ -7,6 +7,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,13 +25,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
         // JWT 토큰 추출
         String token = resolveToken(request);
-
+        System.out.println(token);
         // 토큰이 존재하고 유효하면 인증 정보 설정
         if (token != null && jwtTokenGenerator.validateToken(token)) {
             Authentication authentication = jwtTokenGenerator.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println(authentication.getName());
         }
 
         // 다음 필터로 요청 전달
@@ -38,9 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
+        System.out.println("resolve Token Calledd");
         //1차 확인 -> 쿠키에서
         if(request.getCookies() != null) {
+
             for (Cookie cookie : request.getCookies()) {
+                System.out.println(cookie.getName());
                 if(cookie.getName().equals("accessToken")){
                     return cookie.getValue();
                 }
