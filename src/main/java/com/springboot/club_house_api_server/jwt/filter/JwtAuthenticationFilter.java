@@ -3,6 +3,7 @@ package com.springboot.club_house_api_server.jwt.filter;
 import com.springboot.club_house_api_server.jwt.generator.JwtTokenGenerator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
+        //1차 확인 -> 쿠키에서
+        if(request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if(cookie.getName().equals("accessToken")){
+                    return cookie.getValue();
+                }
+            }
+        }
+        // 2차 확인
         // Authorization 헤더에서 Bearer 토큰 추출
+        // Web에선 필요 없지만 iOS 환경을 잘 몰라서 혹시 필요할까봐 남겨둡니다.
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7); // "Bearer " 이후의 토큰 반환
