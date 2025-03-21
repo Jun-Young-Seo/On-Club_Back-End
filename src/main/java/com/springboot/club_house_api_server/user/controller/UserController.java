@@ -58,13 +58,15 @@ public class UserController {
     //Http-Only Cookie 설정 메소드
     //2025-03-21 추가
     private void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setAttribute("SameSite","None");
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(false) // ✅ HTTPS가 아니므로 false (배포 시 true로 변경)
+                .path("/")
+                .sameSite("Lax") // ✅ Cross-Origin 요청에서 필요
+                .maxAge(maxAge)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
 }
