@@ -60,6 +60,7 @@ public class ClubService {
         if(clubLogoURL!=null && !clubLogoURL.equals("")) {
             club.setClubLogoURL(clubLogoURL);
         }
+
         if(clubBackgroundURL!=null && !clubBackgroundURL.equals("")) {
             club.setClubBackgroundURL(clubBackgroundURL);
         }
@@ -108,6 +109,14 @@ public class ClubService {
         if(clubOpt.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("club Id에 해당하는 클럽이 없습니다.");
         }
-        return ResponseEntity.ok(clubOpt.get());
+        SearchClubResponseDto dto = new SearchClubResponseDto();
+        dto.setClub_id(clubOpt.get().getClubId());
+        dto.setClubName(clubOpt.get().getClubName());
+        dto.setClubDescription(clubOpt.get().getClubDescription());
+        dto.setClubLogoURL(clubOpt.get().getClubLogoURL());
+        dto.setClubBackgroundImageURL(clubOpt.get().getClubBackgroundURL());
+        dto.setClubWhenCreated(clubOpt.get().getClubCreatedAt());
+
+        return ResponseEntity.ok(dto);
     }
 }
