@@ -31,8 +31,9 @@ public class MembershipEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private UserEntity user;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private String role;
+    private RoleType role;
 
     @Column(name = "joined_at")
     @CreationTimestamp
@@ -40,5 +41,22 @@ public class MembershipEntity {
 
     @Column(name = "attendance_rate")
     private double attendanceRate = 0.0;
+
+    public enum RoleType {
+        LEADER("리더"),
+        MANAGER("운영진"),
+        REGULAR("정회원"),
+        INACTIVE("휴회원");
+
+        private final String roleName;
+
+        RoleType(String roleName) {
+            this.roleName = roleName;
+        }
+
+        public String getRoleName() {
+            return roleName;
+        }
+    }
 
 }
