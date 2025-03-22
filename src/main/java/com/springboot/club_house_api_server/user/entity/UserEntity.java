@@ -1,6 +1,7 @@
 package com.springboot.club_house_api_server.user.entity;
 
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
+import com.springboot.club_house_api_server.guest.entity.GuestEntity;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,4 +46,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<MembershipEntity> memberships;
+
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
+    private List<GuestEntity> guests;
+
+
 }

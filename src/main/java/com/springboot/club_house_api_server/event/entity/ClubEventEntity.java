@@ -1,6 +1,7 @@
 package com.springboot.club_house_api_server.event.entity;
 
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
+import com.springboot.club_house_api_server.guest.entity.GuestEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -33,6 +35,8 @@ public class ClubEventEntity {
     @Column(name="description")
     private String eventDescription;
 
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
+    private List<GuestEntity> guests;
 
     public ClubEventEntity(ClubEntity club, LocalDateTime startTime, LocalDateTime endTime, String description) {
         this.club=club;
