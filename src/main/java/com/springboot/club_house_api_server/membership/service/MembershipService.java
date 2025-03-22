@@ -20,6 +20,7 @@ public class MembershipService {
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
 
+    //클럽에 가입 처리하는 경우
     public ResponseEntity<?> joinToClub(long userId, long clubId, String role) {
         //유저 확인
         Optional<UserEntity> userOpt = userRepository.findById(userId);
