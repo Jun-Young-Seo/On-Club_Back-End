@@ -53,9 +53,9 @@ public class GuestService {
         guestEntity.setUser(userOpt.get());
         guestEntity.setEvent(eventOpt.get());
 
-
         guestRepository.save(guestEntity);
 
+        club.setClubAccumulatedGuests(club.getClubAccumulatedGuests() + 1);
         return ResponseEntity.ok("userId : "+ userId+"의 "+"eventId : " +eventId+"참석 처리 완료");
     }
 }
