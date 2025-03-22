@@ -41,6 +41,20 @@ public class ClubEntity {
     @CreationTimestamp
     private LocalDateTime clubCreatedAt;
 
+    //클럽 상세페이징에서 사용할 상세 소개글 필드
+    @Column(name="club_description_detail")
+    private String clubDescriptionDetail;
+
+    //멤버 수
+    @Column(name="club_how_many_members")
+    private int clubHowManyMembers;
+
+    //현재까지 누적 게스트 수
+    @Column(name="club_accumulated_guests")
+    private int clubAccumulatedGuests;
+
+
+    //---------Relation 용 필드들------------------
     // 양방향 매핑 - 클럽에서 거래 내역 조회 가능
     @OneToMany(mappedBy = "club", fetch = FetchType.LAZY)
     private List<TransactionEntity> transactions;

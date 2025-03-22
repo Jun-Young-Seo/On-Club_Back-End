@@ -6,6 +6,7 @@ import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class MembershipService {
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
 
+    @Transactional
     //클럽에 가입 처리하는 경우
     public ResponseEntity<?> joinToClub(long userId, long clubId, String role) {
         //유저 확인
@@ -48,6 +50,9 @@ public class MembershipService {
 
         String clubName = clubOpt.get().getClubName();
         String userTel = userOpt.get().getUserTel();
+
+        //가입하면 클럽 회원 수 증가 시키기
+        clubOpt.get().setClubHowManyMembers(clubOpt.get().getClubHowManyMembers() + 1);
         return ResponseEntity.ok(clubName+"에 "+ userTel+" 님이 성공적으로 가입되었습니다.");
     }
 }
