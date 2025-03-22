@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,8 +42,22 @@ public class UserEntity {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    //토큰 위변조 검증용 db저장필드
     @Column(name ="refresh_token")
     private String refreshToken;
+
+    @Column(name="region", nullable = false, length = 50)
+    private String region;  // 지역
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="gender", nullable = false)
+    private Gender gender;  // 성별 (Enum)
+
+    @Column(name="birth_date", nullable = false)
+    private LocalDate birthDate;  // 생년월일 (YYYY-MM-DD)
+
+    @Column(name="career", nullable = false)
+    private int career; //구력
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<MembershipEntity> memberships;
@@ -50,5 +65,8 @@ public class UserEntity {
     @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
     private List<GuestEntity> guests;
 
+    public enum Gender {
+        MALE, FEMALE
+    }
 
 }
