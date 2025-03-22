@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class ClubEventDto {
+    private long eventId;
     private long clubId;
     private LocalDateTime eventStartTime;
     private LocalDateTime eventEndTime;

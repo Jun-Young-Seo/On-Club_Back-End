@@ -47,7 +47,7 @@ public class ClubEventService {
         List<ClubEventEntity> events = clubEventRepository.findAllEventsByClubId(clubId);
         List<ClubEventDto> response = new ArrayList<>();
         for(ClubEventEntity event : events){
-            ClubEventDto dto = new ClubEventDto(event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
+            ClubEventDto dto = new ClubEventDto(event.getEventId(), event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
             response.add(dto);
         }
         return ResponseEntity.ok(response);
@@ -63,7 +63,7 @@ public class ClubEventService {
         List<ClubEventEntity> events = clubEventRepository.findAllEventsByClubIdAndTimeRange(clubId, startTime, endTime);
         List<ClubEventDto> response = new ArrayList<>();
         for(ClubEventEntity event : events){
-            ClubEventDto dto = new ClubEventDto(event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
+            ClubEventDto dto = new ClubEventDto(event.getEventId(),event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
             response.add(dto);
         }
 
@@ -81,7 +81,7 @@ public class ClubEventService {
         List<ClubEventEntity> events = clubEventRepository.findAllEventsByClubIdAndDateAndKeyword(clubId, startTime, endTime,keyword);
         List<ClubEventDto> response = new ArrayList<>();
         for(ClubEventEntity event : events){
-            ClubEventDto dto = new ClubEventDto(event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
+            ClubEventDto dto = new ClubEventDto(event.getEventId(),event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
             response.add(dto);
         }
 
@@ -97,7 +97,7 @@ public class ClubEventService {
         List<ClubEventEntity> events = clubEventRepository.findAllEventsByUserId(userId);
         List<ClubEventDto> response = new ArrayList<>();
         for(ClubEventEntity event : events){
-            ClubEventDto dto = new ClubEventDto(event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
+            ClubEventDto dto = new ClubEventDto(event.getEventId(),event.getClub().getClubId(), event.getEventStartTime(), event.getEventEndTime(), event.getEventDescription());
             response.add(dto);
         }
         return ResponseEntity.ok(response);
@@ -120,6 +120,7 @@ public class ClubEventService {
         List<ClubEventDto> response = new ArrayList<>();
         for (ClubEventEntity event : events) {
             ClubEventDto dto = new ClubEventDto(
+                    event.getEventId(),
                     event.getClub().getClubId(),
                     event.getEventStartTime(),
                     event.getEventEndTime(),
