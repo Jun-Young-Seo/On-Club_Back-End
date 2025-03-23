@@ -3,11 +3,15 @@ package com.springboot.club_house_api_server.club.account.controller;
 import com.springboot.club_house_api_server.club.account.dto.ClubAccountDto;
 import com.springboot.club_house_api_server.club.account.service.ClubAccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -16,7 +20,13 @@ public class ClubAccountController {
     private final ClubAccountService clubAccountService;
 
     @PostMapping("/make")
-    public ResponseEntity<?> makeAccount(@RequestBody ClubAccountDto clubAccountDto){
+    public ResponseEntity<?> makeAccount(@RequestBody ClubAccountDto clubAccountDto, Authentication authentication) {
+        List<String> allowedRoles = List.of("MANAGER", "LEADER");
+        System.out.println(authentication.getPrincipal().toString());
+        boolean canAccess = clubAccountService.hasClubRole(authentication, clubAccountDto.getClubId(), allowedRoles);
+        if(!canAccess) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("해당 클럽에 계좌를 생성할 권한이 없습니다.");
+        }
        return clubAccountService.makeNewAccount(
                 clubAccountDto.getClubId(),
                 clubAccountDto.getAccountName(),

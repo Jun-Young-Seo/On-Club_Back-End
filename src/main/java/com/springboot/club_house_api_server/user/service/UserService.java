@@ -33,6 +33,10 @@ public class UserService {
                 .userName(joinRequestDto.getUserName())
                 .password(hashPwd)
                 .userTel(joinRequestDto.getUserTel())
+                .birthDate(joinRequestDto.getBirthDate())
+                .career(joinRequestDto.getCareer())
+                .gender(joinRequestDto.getGender())
+                .region(joinRequestDto.getRegion())
                 .build();
         userRepository.save(userEntity);
     }
@@ -49,8 +53,8 @@ public class UserService {
         long refreshTokenValidity = 1000 * 60 * 60; // 1시간 - RefreshToken 확정 후 상수화 할 것
         String userId = String.valueOf(user.get().getUserId());
         //setSubject는 String형으로 받으므로 valueOf
-        String accessToken = jwtTokenGenerator.createToken(userId, "ROLE_USER",accessTokenValidity);
-        String refreshToken = jwtTokenGenerator.createToken(userId, "ROLE_USER",refreshTokenValidity);
+        String accessToken = jwtTokenGenerator.createToken(userId, accessTokenValidity);
+        String refreshToken = jwtTokenGenerator.createToken(userId, refreshTokenValidity);
 
         user.get().setRefreshToken(refreshToken);
         userRepository.save(user.get());
@@ -73,7 +77,7 @@ public class UserService {
         }
 
         long accessTokenValidity = 1000 * 60 * 15;
-        String newAccessToken = jwtTokenGenerator.createToken(userId, "ROLE_USER", accessTokenValidity);
+        String newAccessToken = jwtTokenGenerator.createToken(userId,  accessTokenValidity);
 
         return new LoginResponseDto(userId, newAccessToken, refreshToken);
     }
