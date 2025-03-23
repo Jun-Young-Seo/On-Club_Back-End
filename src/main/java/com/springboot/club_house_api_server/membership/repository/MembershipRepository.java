@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +15,6 @@ public interface MembershipRepository extends JpaRepository<MembershipEntity,Lon
     @Query("SELECT m FROM MembershipEntity m WHERE m.user.userId = :userId AND m.club.clubId = :clubId")
     Optional<MembershipEntity> checkAlreadyJoined(@Param("userId") Long userId, @Param("clubId") Long clubId);
 
+    @Query("SELECT m FROM MembershipEntity m WHERE m.user.userId = :userId")
+    List<MembershipEntity> findAllMembershipsByUserId(@Param("userId") Long userId);
 }
