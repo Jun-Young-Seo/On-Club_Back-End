@@ -1,5 +1,6 @@
 package com.springboot.club_house_api_server.club.account.service;
 
+import com.springboot.club_house_api_server.club.account.dto.ClubAccountDto;
 import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
 
 import com.springboot.club_house_api_server.club.account.repository.ClubAccountRepository;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,16 +42,33 @@ public class ClubAccountService {
         return ResponseEntity.ok(club.getClubName()+"에 새로운 계좌 "+accountName+"이 생성되었습니다.");
     }
 
+    public ResponseEntity<?> getAllClubAccounts(long clubId){
+        List<ClubAccountDto> response = new ArrayList<>();
+        List<ClubAccountEntity> accounts = clubAccountRepository.findAllAccountsByClubId(clubId);
+        for(ClubAccountEntity account : accounts){
+            ClubAccountDto clubAccountDto = ClubAccountDto.builder()
+                    .accountId(account.getAccountId())
+                    .clubId(clubId)
+                    .accountName(account.getAccountName())
+                    .accountNumber(account.getAccountNumber())
+                    .accountOwner(account.getAccountOwner())
+                    .bankName(account.getBankName())
+                    .build();
+            response.add(clubAccountDto);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    //계급 권한 검증 메소드
     public boolean hasClubRole(Authentication authentication, Long clubId, List<String> requiredRoles) {
-        System.out.println(authentication.getPrincipal().toString());
         if (authentication.getPrincipal() instanceof ClubUserDetails principal) {
             String userRole = principal.getRoleForClub(clubId);
-            System.out.println(userRole);
             if(userRole != null){
                 return requiredRoles.contains(userRole);
             }
         }
         return false;
     }
+
 
 }

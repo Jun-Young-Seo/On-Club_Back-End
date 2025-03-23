@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,7 +19,7 @@ public class ClubAccountController {
     @PostMapping("/make")
     public ResponseEntity<?> makeAccount(@RequestBody ClubAccountDto clubAccountDto, Authentication authentication) {
         List<String> allowedRoles = List.of("MANAGER", "LEADER");
-        System.out.println(authentication.getPrincipal().toString());
+
         boolean canAccess = clubAccountService.hasClubRole(authentication, clubAccountDto.getClubId(), allowedRoles);
         if(!canAccess) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("해당 클럽에 계좌를 생성할 권한이 없습니다.");
@@ -33,5 +30,15 @@ public class ClubAccountController {
                 clubAccountDto.getAccountNumber(),
                 clubAccountDto.getAccountOwner(),
                 clubAccountDto.getBankName());
+    }
+
+    @GetMapping("/get-all_accounts")
+    public ResponseEntity<?> getAllAccounts(@RequestParam long clubId, Authentication authentication) {
+        List<String> allowedRoles = List.of("MANAGER", "LEADER");
+        boolean canAccess = clubAccountService.hasClubRole(authentication, clubId, allowedRoles);
+        if(!canAccess) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("해당 클럽의 계좌를 조회할 권한이 없습니다.");
+        }
+        return clubAccountService.getAllClubAccounts(clubId);
     }
 }
