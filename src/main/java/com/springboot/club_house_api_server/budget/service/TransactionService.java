@@ -15,9 +15,31 @@ import java.util.List;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
 
+    //클럽 전체 계좌 거래내역 모아보기용
     public ResponseEntity<?> getAllTransactions(long clubId, long accountId){
         List<BudgetResponseDto> responses = new ArrayList<>();
         List<TransactionEntity> transactions = transactionRepository.findByClubId(clubId);
+
+        for(TransactionEntity transaction : transactions){
+            BudgetResponseDto dto = BudgetResponseDto.builder()
+                    .transactionId(transaction.getTransactionId())
+                    .transactionAmount(transaction.getTransactionAmount())
+                    .transactionBalance(transaction.getTransactionBalance())
+                    .transactionCategory(transaction.getTransactionCategory())
+                    .transactionDate(transaction.getTransactionDate())
+                    .transactionDescription(transaction.getTransactionDescription())
+                    .transactionDetail(transaction.getTransactionDetail())
+                    .transactionMemo(transaction.getTransactionMemo())
+                    .transactionType(transaction.getTransactionType())
+                    .build();
+            responses.add(dto);
+        }
+        return ResponseEntity.ok(responses);
+    }
+
+    public ResponseEntity<?> getAllTransactionByAccountId(long accountId){
+        List<TransactionEntity> transactions = transactionRepository.findByAccountId(accountId);
+        List<BudgetResponseDto> responses = new ArrayList<>();
 
         for(TransactionEntity transaction : transactions){
             BudgetResponseDto dto = BudgetResponseDto.builder()

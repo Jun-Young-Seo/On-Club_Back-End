@@ -3,11 +3,13 @@ package com.springboot.club_house_api_server.club.account.entity;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Entity
+@Getter
 @RequiredArgsConstructor
 @Table(name = "club_account")
 public class ClubAccountEntity {

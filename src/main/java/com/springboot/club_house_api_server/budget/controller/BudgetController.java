@@ -3,6 +3,7 @@ package com.springboot.club_house_api_server.budget.controller;
 import com.springboot.club_house_api_server.budget.repository.TransactionRepository;
 import com.springboot.club_house_api_server.budget.service.TransactionService;
 import com.springboot.club_house_api_server.excel.service.BudgetService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,5 +20,10 @@ public class BudgetController {
     @GetMapping("/get-all")
     public ResponseEntity<?> getAllBudget(@RequestParam int clubId, @RequestParam int accountId) {
         return transactionService.getAllTransactions(clubId, accountId);
+    }
+
+    @GetMapping("/get-all/account_id")
+    public ResponseEntity<?> getAllAccountId(@RequestParam int accountId) {
+        return transactionService.getAllTransactionByAccountId(accountId);
     }
 }
