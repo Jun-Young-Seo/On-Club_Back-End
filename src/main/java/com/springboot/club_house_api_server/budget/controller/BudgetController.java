@@ -1,15 +1,14 @@
 package com.springboot.club_house_api_server.budget.controller;
 
+import com.springboot.club_house_api_server.budget.dto.AddNewTransactionDto;
+import com.springboot.club_house_api_server.budget.dto.BudgetResponseDto;
 import com.springboot.club_house_api_server.budget.repository.TransactionRepository;
 import com.springboot.club_house_api_server.budget.service.TransactionService;
 import com.springboot.club_house_api_server.excel.service.BudgetService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,12 +17,22 @@ public class BudgetController {
     private final TransactionRepository transactionRepository;
     private final TransactionService transactionService;
     @GetMapping("/get-all")
-    public ResponseEntity<?> getAllBudget(@RequestParam int clubId, @RequestParam int accountId) {
-        return transactionService.getAllTransactions(clubId, accountId);
+    public ResponseEntity<?> getAllTransactions(@RequestParam int clubId) {
+        return transactionService.getAllTransactions(clubId);
     }
 
     @GetMapping("/get-all/account_id")
-    public ResponseEntity<?> getAllAccountId(@RequestParam int accountId) {
+    public ResponseEntity<?> getAllTransactionsByAccountId(@RequestParam int accountId) {
         return transactionService.getAllTransactionByAccountId(accountId);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateTransaction(@RequestBody BudgetResponseDto dto){
+        return transactionService.updateTransaction(dto);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<?> addNewTransaction(@RequestBody AddNewTransactionDto dto){
+        return transactionService.addNewTransaction(dto);
     }
 }

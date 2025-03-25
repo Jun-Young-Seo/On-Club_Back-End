@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Builder
 public class BudgetResponseDto {
     private long transactionId;
-    private long transactionAmount;
-    private long transactionBalance;
+    private int transactionAmount;
+    private int transactionBalance;
     private String transactionCategory;
     private LocalDateTime transactionDate;
     private String transactionDescription;

@@ -1,22 +1,32 @@
 package com.springboot.club_house_api_server.budget.service;
 
+import com.springboot.club_house_api_server.budget.dto.AddNewTransactionDto;
 import com.springboot.club_house_api_server.budget.dto.BudgetResponseDto;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
 import com.springboot.club_house_api_server.budget.repository.TransactionRepository;
+import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
+import com.springboot.club_house_api_server.club.account.repository.ClubAccountRepository;
+import com.springboot.club_house_api_server.club.entity.ClubEntity;
+import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
     private final TransactionRepository transactionRepository;
+    private final ClubRepository clubRepository;
+    private final ClubAccountRepository clubAccountRepository;
 
     //클럽 전체 계좌 거래내역 모아보기용
-    public ResponseEntity<?> getAllTransactions(long clubId, long accountId){
+    public ResponseEntity<?> getAllTransactions(long clubId){
         List<BudgetResponseDto> responses = new ArrayList<>();
         List<TransactionEntity> transactions = transactionRepository.findByClubId(clubId);
 
@@ -56,5 +66,77 @@ public class TransactionService {
             responses.add(dto);
         }
         return ResponseEntity.ok(responses);
+    }
+
+    public ResponseEntity<?> updateTransaction(BudgetResponseDto dto){
+        long transactionId = dto.getTransactionId();
+        int updatedRows = transactionRepository.updateTransaction(
+                transactionId,
+                dto.getTransactionDate(),
+                dto.getTransactionType(),
+                dto.getTransactionAmount(),
+                dto.getTransactionBalance(),
+                dto.getTransactionCategory(),
+                dto.getTransactionDescription(),
+                dto.getTransactionMemo(),
+                dto.getTransactionDetail()
+        );
+
+        //한 개의 행도 업데이트 되지 않았다면 id 오류
+        if(updatedRows==0){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction ID에 해당하는 거래가 없습니다.");
+        }
+        TransactionEntity t = transactionRepository.getTransactionEntityByTransactionId(transactionId);
+        BudgetResponseDto response = BudgetResponseDto.builder()
+                .transactionId(t.getTransactionId())
+                .transactionDate(t.getTransactionDate())
+                .transactionType(t.getTransactionType())
+                .transactionAmount(t.getTransactionAmount())
+                .transactionBalance(t.getTransactionBalance())
+                .transactionCategory(t.getTransactionCategory())
+                .transactionDescription(t.getTransactionDescription())
+                .transactionMemo(t.getTransactionMemo())
+                .transactionDetail(t.getTransactionDetail())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+
+    public ResponseEntity<?> addNewTransaction(AddNewTransactionDto dto){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(dto.getClubId());
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 클럽이 없습니다.");
+        }
+        Optional<ClubAccountEntity> accountOpt = clubAccountRepository.findById(dto.getClubAccountId());
+        if(accountOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("accountId 해당하는 계좌가 없습니다.");
+        }
+        TransactionEntity newTransaction = new TransactionEntity(
+                accountOpt.get(),
+                clubOpt.get(),
+                dto.getTransactionDate(),
+                dto.getTransactionType(),
+                dto.getTransactionAmount(),
+                dto.getTransactionBalance(),
+                dto.getTransactionCategory(),
+                dto.getTransactionDescription(),
+                dto.getTransactionMemo(),
+                dto.getTransactionDetail()
+        );
+        transactionRepository.save(newTransaction);
+
+        BudgetResponseDto response = BudgetResponseDto.builder()
+                .transactionId(newTransaction.getTransactionId())
+                .transactionAmount(newTransaction.getTransactionAmount())
+                .transactionBalance(newTransaction.getTransactionBalance())
+                .transactionCategory(newTransaction.getTransactionCategory())
+                .transactionDate(newTransaction.getTransactionDate())
+                .transactionDescription(newTransaction.getTransactionDescription())
+                .transactionDetail(newTransaction.getTransactionDetail())
+                .transactionMemo(newTransaction.getTransactionMemo())
+                .transactionType(newTransaction.getTransactionType())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 }

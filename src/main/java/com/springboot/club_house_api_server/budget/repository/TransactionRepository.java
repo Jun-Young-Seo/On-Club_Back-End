@@ -1,9 +1,12 @@
 package com.springboot.club_house_api_server.budget.repository;
 
+import com.springboot.club_house_api_server.budget.dto.BudgetResponseDto;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
 import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,7 +19,7 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
 
     // 1. 특정 계좌의 거래 내역 조회 (accountId로)
-    @Query("SELECT t FROM TransactionEntity t WHERE t.account.accountId = :accountId")
+    @Query("SELECT t FROM TransactionEntity t WHERE t.account.accountId = :accountId ORDER BY t.transactionDate DESC")
     List<TransactionEntity> findByAccountId(@Param("accountId") Long accountId);
 
     // 2. 특정 클럽의 거래 내역 조회 (clubId로)
@@ -76,4 +79,31 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                                    @Param("club") ClubEntity club,
                                    @Param("transactionDate") LocalDateTime transactionDate);
 
+
+    //Transaction DB Update
+    @Transactional
+    @Modifying
+    @Query("UPDATE TransactionEntity t " +
+            "SET t.transactionDate = :transactionDate, " +
+            "    t.transactionType = :transactionType, " +
+            "    t.transactionAmount = :transactionAmount, " +
+            "    t.transactionBalance = :transactionBalance, " +
+            "    t.transactionCategory = :transactionCategory, " +
+            "    t.transactionDescription = :transactionDescription, " +
+            "    t.transactionMemo = :transactionMemo, " +
+            "    t.transactionDetail = :transactionDetail " +
+            "WHERE t.transactionId = :transactionId")
+    int updateTransaction(
+            @Param("transactionId") Long transactionId,
+            @Param("transactionDate") LocalDateTime transactionDate,
+            @Param("transactionType") String transactionType,
+            @Param("transactionAmount") int transactionAmount,
+            @Param("transactionBalance") int transactionBalance,
+            @Param("transactionCategory") String transactionCategory,
+            @Param("transactionDescription") String transactionDescription,
+            @Param("transactionMemo") String transactionMemo,
+            @Param("transactionDetail") String transactionDetail
+    );
+
+    TransactionEntity getTransactionEntityByTransactionId(long transactionId);
 }
