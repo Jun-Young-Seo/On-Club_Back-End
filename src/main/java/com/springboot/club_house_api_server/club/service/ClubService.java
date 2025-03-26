@@ -1,9 +1,12 @@
 package com.springboot.club_house_api_server.club.service;
 
+import com.springboot.club_house_api_server.budget.repository.AccountRepository;
+import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
 import com.springboot.club_house_api_server.club.dto.SearchClubResponseDto;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +23,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ClubService {
     private final ClubRepository clubRepository;
+    private final AccountRepository accountRepository;
 
     //모든 클럽 조회 메서드
     //이 메서드는 사용자 가입 여부와 관계 없이 모든 클럽 반환 --> FE 렌더링용
@@ -119,4 +123,28 @@ public class ClubService {
 
         return ResponseEntity.ok(dto);
     }
+
+    @Transactional
+    //동호회 메인 계좌 지정 기능
+    public ResponseEntity<?> setMainAccount(long clubId, long accountId){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 CLub이 없습니다.");
+        }
+
+        Optional<ClubAccountEntity> accountOpt = accountRepository.findById(accountId);
+        if(accountOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("account Id에 해당하는 account가 없습니다.");
+        }
+
+        if(clubOpt.get().getClubMainAccountId()!=null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 mainAccount가 있습니다.");
+        }
+
+        clubOpt.get().setClubMainAccountId(accountId);
+        clubRepository.save(clubOpt.get());
+
+        return ResponseEntity.ok("mainAccount 지정 완료 : "+clubOpt.get().getClubMainAccountId());
+    }
+
 }

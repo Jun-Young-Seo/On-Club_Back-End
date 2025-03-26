@@ -52,4 +52,9 @@ public class ClubController {
     public ResponseEntity<?> findClubByClubId(@RequestParam long clubId){
         return clubService.findClubById(clubId);
     }
+
+    @PostMapping("/set/main-account")
+    public ResponseEntity<?> setMainAccount(@RequestParam long clubId, @RequestParam long accountId){
+        return clubService.setMainAccount(clubId, accountId);
+    }
 }
