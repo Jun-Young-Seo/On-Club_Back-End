@@ -106,4 +106,44 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     );
 
     TransactionEntity getTransactionEntityByTransactionId(long transactionId);
+
+
+
+    //=========================For DashBoard==============================
+    //대시보등에서의 수입
+    @Query("SELECT COALESCE(SUM(t.transactionAmount), 0) " +
+            "FROM TransactionEntity t " +
+            "WHERE t.transactionType = '입금' " +
+            "AND t.account.accountId = :accountId " +
+            "AND t.transactionDate BETWEEN :startDate AND :endDate")
+    long getMonthlyIncomeByAccountId(@Param("accountId") Long accountId,
+                                     @Param("startDate") LocalDateTime startDate,
+                                     @Param("endDate") LocalDateTime endDate);
+
+    //대시보드에서의 지출
+    @Query("SELECT COALESCE(SUM(t.transactionAmount), 0) " +
+            "FROM TransactionEntity t " +
+            "WHERE t.transactionType = '출금' " +
+            "AND t.account.accountId = :accountId " +
+            "AND t.transactionDate BETWEEN :startDate AND :endDate")
+    long getMonthlyExpenseByAccountId(@Param("accountId") Long accountId,
+                                      @Param("startDate") LocalDateTime startDate,
+                                      @Param("endDate") LocalDateTime endDate);
+
+    //대시보드에서 지출
+    @Query("SELECT t.transactionBalance " +
+            "FROM TransactionEntity t " +
+            "WHERE t.account.accountId = :accountId " +
+            "AND t.transactionDate BETWEEN :startDate AND :endDate " +
+            "ORDER BY t.transactionDate DESC LIMIT 1")
+    Long getLatestMonthlyBalanceByAccountId(@Param("accountId") Long accountId,
+                                            @Param("startDate") LocalDateTime startDate,
+                                            @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT t FROM TransactionEntity t " +
+            "WHERE t.account.accountId = :accountId " +
+            "ORDER BY t.transactionDate DESC LIMIT 3")
+    List<TransactionEntity> getLastThreeTransactions(@Param("accountId") Long accountId);
+
+
 }

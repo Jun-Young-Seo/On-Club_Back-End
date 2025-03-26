@@ -2,18 +2,23 @@ package com.springboot.club_house_api_server.budget.service;
 
 import com.springboot.club_house_api_server.budget.dto.AddNewTransactionDto;
 import com.springboot.club_house_api_server.budget.dto.BudgetResponseDto;
+import com.springboot.club_house_api_server.budget.dto.DashBoardMonthInfoDto;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
 import com.springboot.club_house_api_server.budget.repository.TransactionRepository;
 import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
 import com.springboot.club_house_api_server.club.account.repository.ClubAccountRepository;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
+import com.springboot.club_house_api_server.jwt.customobj.ClubUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -139,4 +144,63 @@ public class TransactionService {
 
         return ResponseEntity.ok(response);
     }
+
+    public ResponseEntity<?> getBudgetInfo(long clubId){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 클럽이 없습니다.");
+        }
+        //null이면 0
+        Long mainAccountId = clubOpt.get().getClubMainAccountId();
+        if(mainAccountId==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("메인 계좌가 설정되지 않았습니다.");
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
+
+        long income = transactionRepository.getMonthlyIncomeByAccountId(mainAccountId, startOfMonth, now);
+        long expense = transactionRepository.getMonthlyExpenseByAccountId(mainAccountId, startOfMonth, now);
+        Long balance = transactionRepository.getLatestMonthlyBalanceByAccountId(mainAccountId, startOfMonth, now);
+        long monthlySurplus = income - expense;
+
+        DashBoardMonthInfoDto response = DashBoardMonthInfoDto.builder()
+                .monthlyIncome(income)
+                .monthlyExpense(expense)
+                .balance(balance)
+                .monthlySurplus(monthlySurplus)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> getLastThreeTransactions(long clubId){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 클럽이 없습니다.");
+        }
+        Long mainAccountId = clubOpt.get().getClubMainAccountId();
+        if(mainAccountId==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("메인 계좌가 설정되지 않았습니다.");
+        }
+        List<TransactionEntity> lastThreeTransactions = transactionRepository.getLastThreeTransactions(mainAccountId);
+        List<BudgetResponseDto> response = new ArrayList<>();
+        for(TransactionEntity transaction : lastThreeTransactions){
+            BudgetResponseDto b = BudgetResponseDto.builder()
+                    .transactionId(transaction.getTransactionId())
+                    .transactionAmount(transaction.getTransactionAmount())
+                    .transactionBalance(transaction.getTransactionBalance())
+                    .transactionCategory(transaction.getTransactionCategory())
+                    .transactionDate(transaction.getTransactionDate())
+                    .transactionDescription(transaction.getTransactionDescription())
+                    .transactionDetail(transaction.getTransactionDetail())
+                    .transactionMemo(transaction.getTransactionMemo())
+                    .transactionType(transaction.getTransactionType())
+                    .build();
+            response.add(b);
+        }
+        return ResponseEntity.ok(response);
+    }
+
 }

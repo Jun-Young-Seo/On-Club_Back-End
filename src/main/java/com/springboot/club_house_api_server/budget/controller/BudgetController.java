@@ -35,4 +35,18 @@ public class BudgetController {
     public ResponseEntity<?> addNewTransaction(@RequestBody AddNewTransactionDto dto){
         return transactionService.addNewTransaction(dto);
     }
+
+    //for dashboard
+    @GetMapping("/get/latest-three")
+    public ResponseEntity<?> getLastThreeTransactions(@RequestParam long clubId){
+        return transactionService.getLastThreeTransactions(clubId);
+    }
+
+    @GetMapping("/get/budgetInfo")
+    public ResponseEntity<?> getBudgetInfo(@RequestParam long clubId){
+        return transactionService.getBudgetInfo(clubId);
+    }
+
+
+
 }

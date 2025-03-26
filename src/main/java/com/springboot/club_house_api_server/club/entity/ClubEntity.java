@@ -53,6 +53,9 @@ public class ClubEntity {
     @Column(name="club_accumulated_guests")
     private int clubAccumulatedGuests;
 
+    //주거래계좌 id
+    @Column(name="club_main_account", nullable = true)
+    private Long clubMainAccountId;
 
     //---------Relation 용 필드들------------------
     // 양방향 매핑 - 클럽에서 거래 내역 조회 가능
