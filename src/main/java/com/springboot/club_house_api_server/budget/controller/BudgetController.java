@@ -42,7 +42,7 @@ public class BudgetController {
         return transactionService.getLastThreeTransactions(clubId);
     }
 
-    @GetMapping("/get/budgetInfo")
+    @GetMapping("/get/budget-info")
     public ResponseEntity<?> getBudgetInfo(@RequestParam long clubId){
         return transactionService.getBudgetInfo(clubId);
     }
