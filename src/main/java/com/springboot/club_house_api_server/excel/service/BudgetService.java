@@ -1,9 +1,9 @@
 package com.springboot.club_house_api_server.excel.service;
 
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
-import com.springboot.club_house_api_server.budget.repository.AccountRepository;
 import com.springboot.club_house_api_server.budget.repository.TransactionRepository;
 import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
+import com.springboot.club_house_api_server.club.account.repository.ClubAccountRepository;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.club_data.entity.ClubDataEntity;
@@ -35,7 +35,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class BudgetService {
-    private final AccountRepository accountRepository; //계좌 레포
+    private final ClubAccountRepository clubAccountRepository; //계좌 레포
     private final ClubRepository clubRepository; //클럽 레포
     private final TransactionRepository transactionRepository; //거래내역 레포
     private final CategorizationService categorizationService; //GPT 거래내역 분류 서비스
@@ -45,7 +45,7 @@ public class BudgetService {
     public ResponseEntity<?> readBudgetExcel(ExcelDto requestDto) {
         int firstRowNum = 12; //카카오뱅크 내보내기 엑셀 파일은 12행부터 데이터가 시작됨
         List<TransactionEntity> transactionEntityList = new ArrayList<>(); //save All 호출용 리스트
-        ClubAccountEntity account = accountRepository.findById(requestDto.getAccountId())
+        ClubAccountEntity account = clubAccountRepository.findById(requestDto.getAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("Account ID에 해당하는 계좌가 없습니다 Account ID: " + requestDto.getAccountId()));
 
         ClubEntity club = clubRepository.findById(requestDto.getClubId())

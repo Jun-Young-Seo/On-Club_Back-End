@@ -38,6 +38,7 @@ public class ClubEventService {
         return ResponseEntity.status(HttpStatus.OK).body("이벤트가 정상적으로 추가되었습니다.");
     }
 
+
     //클럽 ID로 모든 이벤트 받아오기
     public ResponseEntity<?> getAllEvents(long clubId){
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
@@ -131,5 +132,6 @@ public class ClubEventService {
 
         return ResponseEntity.ok(response);
     }
+
 
 }

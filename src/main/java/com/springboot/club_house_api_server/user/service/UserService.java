@@ -49,8 +49,8 @@ public class UserService {
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.get().getPassword())){
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
-        long accessTokenValidity = 1000 * 60 * 15  ; // 15분 - accessToken
-        long refreshTokenValidity = 1000 * 60 * 60; // 1시간 - RefreshToken 확정 후 상수화 할 것
+        long accessTokenValidity = 1000 * 60 * 15 * 4  ; // 15분 - accessToken
+        long refreshTokenValidity = 1000 * 60 * 60 * 24 * 7 ; // 24시간 - RefreshToken 확정 후 상수화 할 것
         String userId = String.valueOf(user.get().getUserId());
         //setSubject는 String형으로 받으므로 valueOf
         String accessToken = jwtTokenGenerator.createToken(userId, accessTokenValidity);
@@ -63,6 +63,7 @@ public class UserService {
 
     //refresh Token
     public LoginResponseDto refreshToken(String refreshToken){
+        System.out.println(refreshToken);
         if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
             throw new IllegalArgumentException("Invalid Refresh Token");
         }

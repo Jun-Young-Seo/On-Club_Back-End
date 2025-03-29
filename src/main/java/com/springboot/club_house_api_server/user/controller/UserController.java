@@ -34,7 +34,8 @@ public class UserController {
     //Access Token 재발급 엔드포인트
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponseDto> refresh(@RequestHeader("Authorization") String refreshToken){
-        if(refreshToken!=null || !refreshToken.startsWith("Bearer ")){
+//        System.out.println(refreshToken);
+        if(refreshToken!=null && refreshToken.startsWith("Bearer ")){
             refreshToken = refreshToken.substring(7);
         }
         LoginResponseDto response = userService.refreshToken(refreshToken);

@@ -17,6 +17,7 @@ public class BudgetController {
     private final TransactionRepository transactionRepository;
     private final TransactionService transactionService;
     @GetMapping("/get-all")
+
     public ResponseEntity<?> getAllTransactions(@RequestParam int clubId) {
         return transactionService.getAllTransactions(clubId);
     }

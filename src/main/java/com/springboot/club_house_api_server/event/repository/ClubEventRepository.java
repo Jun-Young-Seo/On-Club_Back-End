@@ -7,8 +7,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ClubEventRepository extends JpaRepository<ClubEventEntity,Long> {
+
+    @Query("select e from ClubEventEntity e where e.eventId=:eventId")
+    Optional<ClubEventEntity> findByEventId(@Param("eventId") long eventId);
 
     //클럽 ID로 그 클럽의 모든 이벤트 조회
     @Query("select e from ClubEventEntity e WHERE e.club.clubId = :clubId")
