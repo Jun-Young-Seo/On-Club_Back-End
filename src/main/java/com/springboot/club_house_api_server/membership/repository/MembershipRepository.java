@@ -12,6 +12,9 @@ import java.util.Optional;
 @Repository
 public interface MembershipRepository extends JpaRepository<MembershipEntity,Long> {
 
+    @Query("SELECT  m from MembershipEntity  m WHERE m.membershipId=:membershipId")
+    Optional<MembershipEntity> findByMembershipId(@Param("membershipId") Long membershipId);
+
     @Query("SELECT m FROM MembershipEntity m WHERE m.user.userId = :userId AND m.club.clubId = :clubId")
     Optional<MembershipEntity> checkAlreadyJoined(@Param("userId") Long userId, @Param("clubId") Long clubId);
 

@@ -57,4 +57,9 @@ public class ClubController {
     public ResponseEntity<?> setMainAccount(@RequestParam long clubId, @RequestParam long accountId){
         return clubService.setMainAccount(clubId, accountId);
     }
+
+    @GetMapping("/get/main-account")
+    public ResponseEntity<?> getMainAccount(@RequestParam long clubId){
+        return clubService.getMainAccount(clubId);
+    }
 }

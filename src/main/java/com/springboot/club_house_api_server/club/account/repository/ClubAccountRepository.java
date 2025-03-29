@@ -18,5 +18,6 @@ public interface ClubAccountRepository extends JpaRepository<ClubAccountEntity, 
     @Query("SELECT a FROM ClubAccountEntity a WHERE a.club.clubId = :clubId")
     List<ClubAccountEntity> findAllAccountsByClubId(@Param("clubId") Long clubId);
 
-
+    @Query("SELECT  a FROM  ClubAccountEntity a where a.accountId= :accountId")
+    ClubAccountEntity findAccountByAccountId(@Param("accountId") Long accountId);
 }

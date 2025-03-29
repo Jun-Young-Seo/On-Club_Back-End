@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 모든 요청 허용 (테스트라서.)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/user/login", "/api/user/join", "/api/user/logout",
+                        .requestMatchers("/api/user/login", "/api/user/join", "/api/user/logout","/api/user/refresh",
                                 "/bot/audio-to-text", "/bot/text-to-summary").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
                         .requestMatchers("/api/user/**").hasRole("USER")
                         .requestMatchers("/api/club/find/all").authenticated()
