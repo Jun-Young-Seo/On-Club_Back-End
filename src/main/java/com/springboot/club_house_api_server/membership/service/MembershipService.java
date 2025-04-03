@@ -2,15 +2,20 @@ package com.springboot.club_house_api_server.membership.service;
 
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
+import com.springboot.club_house_api_server.membership.dto.MembershipResponseDto;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -66,5 +71,31 @@ public class MembershipService {
             }
         }
         return false;
+    }
+
+    public ResponseEntity<?> getAllMembershipsByClubId(long clubId){
+        List<MembershipEntity> members = membershipRepository.findAllMembershipsByClubId(clubId);
+        List<MembershipResponseDto> response = new ArrayList<>();
+        for(MembershipEntity membership : members) {
+            Optional<UserEntity> userOpt = userRepository.findById(membership.getUser().getUserId());
+            if(userOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId에 해당하는 유저가 없습니다. membership Id: "+membership.getMembershipId());
+            }
+            UserEntity user = userOpt.get();
+            MembershipResponseDto dto = MembershipResponseDto.builder()
+                    .membershipId(membership.getMembershipId())
+                    .attendanceRate(membership.getAttendanceRate())
+                    .birthDate(user.getBirthDate())
+                    .career(user.getCareer())
+                    .region(user.getRegion())
+                    .userName(user.getUserName())
+                    .userTel(user.getUserTel())
+                    .gender(user.getGender())
+                    .role(membership.getRole())
+                    .build();
+            response.add(dto);
+        }
+
+        return ResponseEntity.ok(response);
     }
 }

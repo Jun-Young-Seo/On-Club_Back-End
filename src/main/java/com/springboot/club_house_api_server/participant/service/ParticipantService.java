@@ -69,7 +69,6 @@ public class ParticipantService {
         List<ParticipantResponseDto> response = new ArrayList<>();
         for(ParticipantEntity participantEntity : participantEntityList) {
             UserEntity user = participantEntity.getUser();
-//            System.out.println(user.getUserId());
             GameParticipantEntity gpe = gameParticipantRepository.findMostRecentGameParticipant(user.getUserId(),eventId);
             int gameCount = gameParticipantRepository.countGamesByEventIdAndUserId(eventId,user.getUserId());
             LocalDateTime lastGame = null;
