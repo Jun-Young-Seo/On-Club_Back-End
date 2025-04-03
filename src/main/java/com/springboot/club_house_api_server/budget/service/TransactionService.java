@@ -162,7 +162,12 @@ public class TransactionService {
 
         long income = transactionRepository.getMonthlyIncomeByAccountId(mainAccountId, startOfMonth, now);
         long expense = transactionRepository.getMonthlyExpenseByAccountId(mainAccountId, startOfMonth, now);
-        Long balance = transactionRepository.getLatestMonthlyBalanceByAccountId(mainAccountId, startOfMonth, now);
+        Optional<TransactionEntity> balanceOpt = transactionRepository.findTopByAccount_AccountIdOrderByTransactionDateDesc(mainAccountId);
+        if(balanceOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("balnce err");
+        }
+        int balance = balanceOpt.get().getTransactionBalance();
+//        Long balance = transactionRepository.getLatestMonthlyBalanceByAccountId(mainAccountId, startOfMonth, now);
         long monthlySurplus = income - expense;
 
         DashBoardMonthInfoDto response = DashBoardMonthInfoDto.builder()

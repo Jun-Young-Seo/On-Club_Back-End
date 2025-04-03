@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<TransactionEntity, Long> {
@@ -131,14 +132,15 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
                                       @Param("endDate") LocalDateTime endDate);
 
     //대시보드에서 지출
-    @Query("SELECT t.transactionBalance " +
-            "FROM TransactionEntity t " +
-            "WHERE t.account.accountId = :accountId " +
-            "AND t.transactionDate BETWEEN :startDate AND :endDate " +
-            "ORDER BY t.transactionDate DESC LIMIT 1")
-    Long getLatestMonthlyBalanceByAccountId(@Param("accountId") Long accountId,
-                                            @Param("startDate") LocalDateTime startDate,
-                                            @Param("endDate") LocalDateTime endDate);
+//    @Query(value = "SELECT t.transactionBalance " +
+//            "FROM TransactionEntity t " +
+//            "WHERE t.account.accountId = :accountId " +
+//            "AND t.transactionDate BETWEEN :startDate AND :endDate " +
+//            "ORDER BY t.transactionDate DESC LIMIT 1", nativeQuery = true)
+//    Long getLatestMonthlyBalanceByAccountId(@Param("accountId") Long accountId,
+//                                            @Param("startDate") LocalDateTime startDate,
+//                                            @Param("endDate") LocalDateTime endDate);
+    Optional<TransactionEntity> findTopByAccount_AccountIdOrderByTransactionDateDesc(Long accountId);
 
     @Query("SELECT t FROM TransactionEntity t " +
             "WHERE t.account.accountId = :accountId " +

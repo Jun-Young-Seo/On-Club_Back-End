@@ -4,10 +4,7 @@ import com.springboot.club_house_api_server.membership.dto.MembershipJoinDto;
 import com.springboot.club_house_api_server.membership.service.MembershipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,5 +18,10 @@ public class MembershipController {
                 membershipJoinDto.getUserId(),
                 membershipJoinDto.getClubId(),
                 membershipJoinDto.getRole());
+    }
+
+    @GetMapping("/all-members")
+    public ResponseEntity<?> getAllMembers(@RequestParam long clubId){
+        return membershipService.getAllMembershipsByClubId(clubId);
     }
 }
