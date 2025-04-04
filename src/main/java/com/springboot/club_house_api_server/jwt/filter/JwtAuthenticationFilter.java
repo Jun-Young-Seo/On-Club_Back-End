@@ -41,18 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        //Cookie 방식은 SSL이 필용해서 일단 보류...
-//
-//        //1차 확인 -> 쿠키에서
-//        if(request.getCookies() != null) {
-//
-//            for (Cookie cookie : request.getCookies()) {
-//                System.out.println(cookie.getName());
-//                if(cookie.getName().equals("accessToken")){
-//                    return cookie.getValue();
-//                }
-//            }
-//        }
 //      // Authorization 헤더에서 Bearer 토큰 추출
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {

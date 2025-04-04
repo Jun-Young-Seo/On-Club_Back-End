@@ -41,11 +41,21 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 모든 요청 허용 (테스트라서.)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/user/login", "/api/user/join", "/api/user/logout","/api/user/refresh",
-                                "/bot/audio-to-text", "/bot/text-to-summary").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
-                        .requestMatchers("/api/user/**").hasRole("USER")
-                        .requestMatchers("/api/club/find/all").authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/user/login", "/api/user/join", "/api/user/logout","/api/user/refresh"
+                                ,"/api/club/add","/api/club/find/**", "/api/event/get-event/**", "/api/guest/attend/request",
+                                "/api/membership/join/request", "/api/membership/my-role"
+                                ,"/api/membership/withdraw","/api/notification/**").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
+                        .requestMatchers("/api/budget/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/chart/**").hasAnyRole("MANAGER","LEADER")
+                        .requestMatchers("/club/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/account").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/event/add-event").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/excel/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/game/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/membership/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/openai/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/participant/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/s3/**").hasAnyRole("LEADER","MANAGER")
                 )
                 // 커스텀 예외 필터 -> 인증 필터로 처리
                 // 커스텀 예외 필터에서 만료 토큰, 위조 토큰 처리
@@ -67,7 +77,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));  //react 로컬 허용--> 나중에 배포후 변경필요
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));  // 모든 헤더 허용
         configuration.setAllowCredentials(true);  // 쿠키 포함 허용 -- JWT HTTP Only 쿠키로 쓸 예정
 

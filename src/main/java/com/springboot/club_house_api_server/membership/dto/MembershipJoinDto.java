@@ -13,5 +13,5 @@ import lombok.Setter;
 public class MembershipJoinDto {
     private long userId;
     private long clubId;
-    private MembershipEntity.RoleType role;
+
 }
