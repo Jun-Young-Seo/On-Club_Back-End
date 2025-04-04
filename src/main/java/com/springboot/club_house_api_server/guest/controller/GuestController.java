@@ -15,8 +15,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class GuestController {
     private final GuestService guestService;
 
-    @PostMapping("/attend")
+    @PostMapping("/attend/request")
     public ResponseEntity<?> attendEventAsGuest(@RequestBody GuestRequestDto dto){
         return guestService.attendEventAsGuest(dto.getUserId(), dto.getEventId());
+    }
+
+    @PostMapping("/attend/approve")
+    public ResponseEntity<?> approveGuest(@RequestBody GuestRequestDto dto){
+        return guestService.approveGuest(dto.getUserId(), dto.getEventId());
+    }
+
+    @PostMapping("/attend/reject")
+    public ResponseEntity<?> rejectGuest(@RequestBody GuestRequestDto dto){
+        return guestService.rejectGuest(dto.getUserId(), dto.getEventId());
     }
 }

@@ -4,18 +4,13 @@ import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
 import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
 import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
 import com.springboot.club_house_api_server.user.service.UserService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/user")
+@RequestMapping("/api/user")
 public class UserController {
     private final UserService userService;
     //회원가입 엔드포인트
@@ -26,10 +21,8 @@ public class UserController {
     }
     //로그인 엔드포인트
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto request, HttpServletResponse response){
-        LoginResponseDto r= userService.login(request);
-
-        return ResponseEntity.ok(r);
+    public ResponseEntity<?> login(@RequestBody LoginRequestDto request){
+        return userService.login(request);
     }
     //Access Token 재발급 엔드포인트
     @PostMapping("/refresh")
@@ -42,18 +35,16 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    //For Test Exception Filter
-    @GetMapping("/test")
-    public ResponseEntity<String> test(){
-        return new ResponseEntity<>("Correct Token", HttpStatus.OK);
-    }
-
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String refreshToken){
         String logoutMsg = userService.logout(refreshToken);
         return ResponseEntity.ok(logoutMsg);
     }
 
+    @GetMapping("/info")
+    public ResponseEntity<?> getUserInfo(@RequestParam long userId){
+        return userService.getUserInfo(userId);
+    }
     //Http-Only Cookie 설정 메소드
     //2025-03-21 추가
     //SSL 설정 이슈로 보류 ㅠㅠㅠ

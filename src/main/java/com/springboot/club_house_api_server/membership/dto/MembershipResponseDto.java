@@ -5,6 +5,7 @@ import com.springboot.club_house_api_server.user.entity.UserEntity;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,7 +14,9 @@ import java.time.LocalDate;
 @Builder
 public class MembershipResponseDto {
     private Long membershipId;
-    private double attendanceRate;
+    private int attendanceCount;
+    private int eventCount;
+    private LocalDateTime joinedAt;
     private MembershipEntity.RoleType role;
     private String userName;
     private String userTel;

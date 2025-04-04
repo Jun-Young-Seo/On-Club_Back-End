@@ -11,8 +11,16 @@ import java.util.Optional;
 
 public interface ClubEventRepository extends JpaRepository<ClubEventEntity,Long> {
 
+    //클럽에 속하는 이벤트의 갯수 세기
+    //membership에서 attendanceCount/EventCount로 나타내기 위한 쿼리문
+    @Query("SELECT COUNT(e) FROM ClubEventEntity e WHERE e.club.clubId = :clubId")
+    Integer countEventsByClubId(@Param("clubId") Long clubId);
+
     @Query("select e from ClubEventEntity e where e.eventId=:eventId")
     Optional<ClubEventEntity> findByEventId(@Param("eventId") long eventId);
+
+    @Query("select e.club.clubId from ClubEventEntity e where e.eventId=:eventId")
+    Optional<Long> findClubByEventId(@Param("eventId") long eventId);
 
     //클럽 ID로 그 클럽의 모든 이벤트 조회
     @Query("select e from ClubEventEntity e WHERE e.club.clubId = :clubId")

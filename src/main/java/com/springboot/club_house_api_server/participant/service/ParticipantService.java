@@ -5,6 +5,8 @@ import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
 import com.springboot.club_house_api_server.game.entity.GameParticipantEntity;
 import com.springboot.club_house_api_server.game.repository.GameParticipantRepository;
+import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
+import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.participant.dto.ParticipantResponseDto;
 import com.springboot.club_house_api_server.participant.entity.ParticipantEntity;
 import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
@@ -28,6 +30,7 @@ public class ParticipantService {
     private final ClubRepository clubRepository;
     private final ClubEventRepository clubEventRepository;
     private final GameParticipantRepository gameParticipantRepository;
+    private final MembershipRepository membershipRepository;
 
     @Transactional
     public void joinToEvent(long userId, long eventId) {
@@ -35,8 +38,17 @@ public class ParticipantService {
         ClubEventEntity event = clubEventRepository.findByEventId(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("eventId에 해당하는 이벤트가 없습니다."));
 
+
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("userId에 해당하는 유저가 없습니다."));
+
+        long clubId = event.getClub().getClubId();
+
+        MembershipEntity membership = membershipRepository.getMembershipEntityByUserIdAndClubId(userId,clubId)
+                .orElseThrow(()-> new IllegalArgumentException("MembershipId에 해당하는 membership이 없습니다."));
+
+        membership.setAttendanceCount(membership.getAttendanceCount()+1);
+        membershipRepository.save(membership);
 
         ParticipantEntity p = ParticipantEntity.builder()
                 .user(user)

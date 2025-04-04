@@ -39,8 +39,8 @@ public class MembershipEntity {
     @CreationTimestamp
     private LocalDateTime joinedAt;
 
-    @Column(name = "attendance_rate")
-    private double attendanceRate = 0.0;
+    @Column(name = "attendance_count")
+    private int attendanceCount = 0;
 
     public enum RoleType {
         LEADER("리더"),
