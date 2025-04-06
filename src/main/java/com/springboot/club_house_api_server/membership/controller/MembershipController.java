@@ -5,6 +5,7 @@ import com.springboot.club_house_api_server.membership.dto.MembershipModifyDto;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.membership.service.MembershipService;
+import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,18 @@ public class MembershipController {
     @PostMapping("/join/reject")
     public ResponseEntity<?> joinRejectToClub(@RequestBody MembershipJoinDto membershipJoinDto){
         return membershipService.rejectJoinRequest(membershipJoinDto.getUserId(), membershipJoinDto.getClubId());
+    }
+
+    //서비스 회원이지만 멤버십이 아닌 경우
+    @PostMapping("/join/direct-user")
+    public ResponseEntity<?> joinDirectMembershipWhenUserExist(@RequestParam String userTel, @RequestParam long clubId){
+        return membershipService.joinDirectMembershipWhenUserExist(userTel, clubId);
+    }
+
+    //서비스 회원도 아닌 경우
+    @PostMapping("/join/direct-not-user")
+    public ResponseEntity<?> joinDirectMembershipWhenUserNotExist(@RequestBody JoinRequestDto joinRequestDto, @RequestParam long clubId){
+        return membershipService.joinDirectMembershipWhenUserNotExist(joinRequestDto, clubId);
     }
 
     @GetMapping("/all-members")

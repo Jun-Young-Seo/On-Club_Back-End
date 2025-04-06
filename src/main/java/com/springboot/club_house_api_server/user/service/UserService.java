@@ -1,6 +1,7 @@
 package com.springboot.club_house_api_server.user.service;
 
 import com.springboot.club_house_api_server.jwt.generator.JwtTokenGenerator;
+import com.springboot.club_house_api_server.membership.service.MembershipService;
 import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
 import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
 import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
@@ -25,10 +26,10 @@ public class UserService {
     private final JwtTokenGenerator jwtTokenGenerator;
 
     //회원가입
-    public void join(JoinRequestDto joinRequestDto){
+    public ResponseEntity<?> join(JoinRequestDto joinRequestDto){
         Optional<UserEntity> userExist = userRepository.findByUserTel(joinRequestDto.getUserTel());
         if(userExist.isPresent()){
-            throw new IllegalArgumentException("이미 가입된 전화번호입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 가입된 전화번호입니다.");
         }
         String hashPwd = passwordEncoder.encode(joinRequestDto.getPassword());
 
@@ -42,7 +43,11 @@ public class UserService {
                 .region(joinRequestDto.getRegion())
                 .build();
         userRepository.save(userEntity);
+
+        return ResponseEntity.ok("회원가입 성공");
     }
+
+
     //Login
     public ResponseEntity<?> login(LoginRequestDto loginRequestDto){
         Optional<UserEntity> userOpt = userRepository.findByUserTel(loginRequestDto.getUserTel());

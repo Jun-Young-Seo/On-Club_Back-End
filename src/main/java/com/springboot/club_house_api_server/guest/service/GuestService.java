@@ -10,6 +10,7 @@ import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.notification.dto.NotificationSendDto;
 import com.springboot.club_house_api_server.notification.entity.NotificationEntity;
+import com.springboot.club_house_api_server.notification.repository.NotificationRepository;
 import com.springboot.club_house_api_server.notification.service.NotificationService;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
@@ -31,6 +32,7 @@ public class GuestService {
     private final ClubEventRepository clubEventRepository;
     private final MembershipRepository membershipRepository;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     public ResponseEntity<?> attendEventAsGuest(long userId, long eventId){
         Optional<UserEntity> userOpt = userRepository.findById(userId);
@@ -44,11 +46,15 @@ public class GuestService {
         ClubEntity club = eventOpt.get().getClub();
         Optional<MembershipEntity> membershipOpt = membershipRepository.getMembershipEntityByUserIdAndClubId(userId, club.getClubId());
         if(membershipOpt.isPresent()){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 클럽에 가입한 유저입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 클럽에 가입한 유저입니다.");
         }
         Optional<GuestEntity> alreadyAttend = guestRepository.findByUserAndEvent(userOpt.get(), eventOpt.get());
         if(alreadyAttend.isPresent()){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 참석한 유저입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 참석한 유저입니다.");
+        }
+        //중복 신청 방지 로직
+        if(notificationRepository.existsJoinRequest(userId,eventId,NotificationEntity.NotificationType.GUEST_REQUEST)){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 게스트 참여 신청 했습니다.");
         }
 
         long clubId = club.getClubId();
@@ -80,11 +86,11 @@ public class GuestService {
         ClubEntity club = eventOpt.get().getClub();
         Optional<MembershipEntity> membershipOpt = membershipRepository.getMembershipEntityByUserIdAndClubId(userId, club.getClubId());
         if(membershipOpt.isPresent()){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 클럽에 가입한 유저입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 클럽에 가입한 유저입니다.");
         }
         Optional<GuestEntity> alreadyAttend = guestRepository.findByUserAndEvent(userOpt.get(), eventOpt.get());
         if(alreadyAttend.isPresent()){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 참석한 유저입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 참석한 유저입니다.");
         }
         GuestEntity guestEntity = new GuestEntity();
         guestEntity.setClub(club);
@@ -119,11 +125,11 @@ public class GuestService {
         ClubEntity club = eventOpt.get().getClub();
         Optional<MembershipEntity> membershipOpt = membershipRepository.getMembershipEntityByUserIdAndClubId(userId, club.getClubId());
         if(membershipOpt.isPresent()){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 클럽에 가입한 유저입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 클럽에 가입한 유저입니다.");
         }
         Optional<GuestEntity> alreadyAttend = guestRepository.findByUserAndEvent(userOpt.get(), eventOpt.get());
         if(alreadyAttend.isPresent()){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 참석한 유저입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 참석한 유저입니다.");
         }
         NotificationSendDto sendDto = NotificationSendDto.builder()
                 .userIdList(List.of(userId))
