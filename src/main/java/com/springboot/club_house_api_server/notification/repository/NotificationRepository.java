@@ -12,4 +12,14 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
     @Query("SELECT n FROM NotificationEntity n WHERE n.user.userId = :userId ORDER BY n.createdAt DESC")
     List<NotificationEntity> findAllByUserId(@Param("userId") Long userId);
 
+    //중복 가입신청, 게스트 신청 방지 코드
+    @Query("SELECT COUNT(n) > 0 FROM NotificationEntity n " +
+            "WHERE n.referenceId = :referenceId AND n.type = :type AND n.targetId = :targetId")
+    boolean existsJoinRequest(
+            @Param("referenceId") Long referenceId,
+            @Param("targetId") Long targetId,
+            @Param("type") NotificationEntity.NotificationType type
+    );
+
+
 }

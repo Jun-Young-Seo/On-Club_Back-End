@@ -15,10 +15,16 @@ public class UserController {
     private final UserService userService;
     //회원가입 엔드포인트
     @PostMapping("/join")
-    public ResponseEntity<String> join(@RequestBody JoinRequestDto request){
-        userService.join(request);
-        return ResponseEntity.ok("회원가입 성공");
+    public ResponseEntity<?> join(@RequestBody JoinRequestDto request){
+        return userService.join(request);
     }
+
+    //기존 회원인데 운영진 권한으로 멤버십 가입시키는 경우
+//    @PostMapping("/join-direct")
+//    public ResponseEntity<?> joinDirect(@RequestParam String userTel, @RequestParam long clubId){
+//        return userService.joinMembershipAlreadyUser(userTel, clubId);
+//    }
+
     //로그인 엔드포인트
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDto request){

@@ -9,15 +9,19 @@ import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.notification.dto.NotificationSendDto;
 import com.springboot.club_house_api_server.notification.entity.NotificationEntity;
+import com.springboot.club_house_api_server.notification.repository.NotificationRepository;
 import com.springboot.club_house_api_server.notification.service.NotificationService;
+import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +35,8 @@ public class MembershipService {
     private final ClubRepository clubRepository;
     private final ClubEventRepository clubEventRepository;
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     //클럽에 가입 요청하는 경우
@@ -38,18 +44,23 @@ public class MembershipService {
         //유저 확인
         Optional<UserEntity> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("userId를 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId를 확인해주세요.");
         }
         //클럽 확인
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if (clubOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("clubId를 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId를 확인해주세요.");
         }
         //중복가입 확인
         Optional<MembershipEntity> existingMembership = membershipRepository.getMembershipEntityByUserIdAndClubId(userId, clubId);
         if (existingMembership.isPresent()) {
-            return ResponseEntity.badRequest().body("이미 이 클럽에 가입한 사용자입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 이 클럽에 가입한 사용자입니다.");
         }
+        //중복 가입신청 쪽지폭탄 방지
+        if(notificationRepository.existsJoinRequest(userId,clubId, NotificationEntity.NotificationType.JOIN_REQUEST)){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 가입신청 했습니다.");
+        }
+
         List<Long> clubManagerIds = membershipRepository.findUserIdsOfManagersAndLeadersByClubId(clubId);
         NotificationSendDto sendDto = NotificationSendDto.builder()
                         .type(NotificationEntity.NotificationType.JOIN_REQUEST)
@@ -71,17 +82,17 @@ public class MembershipService {
         //유저 확인
         Optional<UserEntity> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("userId를 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId를 확인해주세요.");
         }
         //클럽 확인
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if (clubOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("clubId를 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId를 확인해주세요.");
         }
         //중복가입 확인
         Optional<MembershipEntity> existingMembership = membershipRepository.getMembershipEntityByUserIdAndClubId(userId, clubId);
         if (existingMembership.isPresent()) {
-            return ResponseEntity.badRequest().body("이미 이 클럽에 가입한 사용자입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 이 클럽에 가입한 사용자입니다.");
         }
         // 동호회에 회원가입이 되면 멤버십 테이블이 새 항목으로 저장
         MembershipEntity membership = new MembershipEntity();
@@ -115,17 +126,17 @@ public class MembershipService {
         //유저 확인
         Optional<UserEntity> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("userId를 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId를 확인해주세요.");
         }
         //클럽 확인
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if (clubOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("clubId를 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId를 확인해주세요.");
         }
         //중복가입 확인
         Optional<MembershipEntity> existingMembership = membershipRepository.getMembershipEntityByUserIdAndClubId(userId, clubId);
         if (existingMembership.isPresent()) {
-            return ResponseEntity.badRequest().body("이미 이 클럽에 가입한 사용자입니다.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 이 클럽에 가입한 사용자입니다.");
         }
         String clubName = clubOpt.get().getClubName();
 
@@ -219,5 +230,90 @@ public class MembershipService {
         }
         MembershipEntity membership = membershipOpt.get();
         return ResponseEntity.ok().body(membership.getRole());
+    }
+
+    @Transactional
+    //운영진용 멤버십 가입 API -> 승인 없이 바로
+    public ResponseEntity<?> joinMembershipDirect(long userId, long clubId){
+        Optional<UserEntity> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId를 확인해주세요.");
+        }
+        //클럽 확인
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if (clubOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId를 확인해주세요.");
+        }
+        //중복가입 확인
+        Optional<MembershipEntity> existingMembership = membershipRepository.getMembershipEntityByUserIdAndClubId(userId, clubId);
+        if (existingMembership.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 이 클럽에 가입한 사용자입니다.");
+        }
+        UserEntity user = userOpt.get();
+        ClubEntity club = clubOpt.get();
+
+        MembershipEntity membershipEntity = MembershipEntity.builder()
+                .club(club)
+                .user(user)
+                .role(MembershipEntity.RoleType.REGULAR)
+                .build();
+        membershipRepository.save(membershipEntity);
+
+        return ResponseEntity.ok(membershipEntity.getMembershipId());
+    }
+
+    @Transactional
+    //운영진용 직통가입 - 서비스 유저이지만 멤버십이 아닌 경우 강제로 가입시키면서 멤버십 추가까지
+    public ResponseEntity<?> joinDirectMembershipWhenUserExist(String userTel, long clubId){
+        Optional<UserEntity> userOpt = userRepository.findByUserTel(userTel);
+        if(userOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId에 해당하는 유저가 없습니다.");
+        }
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 클럽이 없습니다.");
+        }
+
+        UserEntity userEntity = userOpt.get();
+        ClubEntity clubEntity = clubOpt.get();
+
+        Optional<MembershipEntity> membershipOpt = membershipRepository.getMembershipEntityByUserIdAndClubId(userEntity.getUserId(), clubId);
+        if(membershipOpt.isPresent()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 클럽에 가입된 회원입니다.");
+        }
+
+        MembershipEntity membershipEntity = MembershipEntity.builder()
+                .club(clubEntity)
+                .user(userEntity)
+                .role(MembershipEntity.RoleType.REGULAR)
+                .build();
+
+        membershipRepository.save(membershipEntity);
+
+        return ResponseEntity.ok(membershipEntity.getMembershipId());
+    }
+
+    @Transactional
+    //서비스 유저도 아니지만 멤버십에 직통 가입을 원하는 경우 -- excel 파싱 후 사용
+    public ResponseEntity<?> joinDirectMembershipWhenUserNotExist(JoinRequestDto joinRequestDto, long clubId){
+        Optional<UserEntity> userExist = userRepository.findByUserTel(joinRequestDto.getUserTel());
+        if(userExist.isPresent()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 가입된 전화번호입니다.");
+        }
+        String hashPwd = passwordEncoder.encode(joinRequestDto.getPassword());
+
+        UserEntity userEntity = UserEntity.builder()
+                .userName(joinRequestDto.getUserName())
+                .password(hashPwd)
+                .userTel(joinRequestDto.getUserTel())
+                .birthDate(joinRequestDto.getBirthDate())
+                .career(joinRequestDto.getCareer())
+                .gender(joinRequestDto.getGender())
+                .region(joinRequestDto.getRegion())
+                .build();
+
+        userRepository.save(userEntity);
+
+        return joinDirectMembershipWhenUserExist(joinRequestDto.getUserTel(), clubId);
     }
 }

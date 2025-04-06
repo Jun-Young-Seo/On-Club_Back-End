@@ -39,16 +39,17 @@ public class SecurityConfig {
                 // 세션 방식이 아니므로 STATELESS
                 .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 모든 요청 허용 (테스트라서.)
+                // 모든 요청 허용
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/user/login", "/api/user/join", "/api/user/logout","/api/user/refresh"
                                 ,"/api/club/add","/api/club/find/**", "/api/event/get-event/**", "/api/guest/attend/request",
                                 "/api/membership/join/request", "/api/membership/my-role"
-                                ,"/api/membership/withdraw","/api/notification/**").permitAll()  // ROLE_ 접두사는 자동으로 붙여짐
+                                ,"/api/membership/withdraw","/api/notification/**", "/api/user/info",
+                                "/api/membership/join/direct-user","/api/membership/join/direct-not-user").permitAll()
                         .requestMatchers("/api/budget/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/chart/**").hasAnyRole("MANAGER","LEADER")
                         .requestMatchers("/club/**").hasAnyRole("LEADER","MANAGER")
-                        .requestMatchers("/api/account").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/account/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/event/add-event").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/excel/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/game/**").hasAnyRole("LEADER","MANAGER")
@@ -56,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/openai/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/participant/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/s3/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers("/api/guest/**").hasAnyRole("LEADER","MANAGER")
+                        .anyRequest().authenticated()
                 )
                 // 커스텀 예외 필터 -> 인증 필터로 처리
                 // 커스텀 예외 필터에서 만료 토큰, 위조 토큰 처리
