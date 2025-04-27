@@ -1,8 +1,6 @@
 package com.springboot.club_house_api_server.budget.service;
 
-import com.springboot.club_house_api_server.budget.dto.AddNewTransactionDto;
-import com.springboot.club_house_api_server.budget.dto.BudgetResponseDto;
-import com.springboot.club_house_api_server.budget.dto.DashBoardMonthInfoDto;
+import com.springboot.club_house_api_server.budget.dto.*;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
 import com.springboot.club_house_api_server.budget.repository.TransactionRepository;
 import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
@@ -19,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -204,6 +203,70 @@ public class TransactionService {
                     .transactionType(transaction.getTransactionType())
                     .build();
             response.add(b);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    //For chart.js
+    public ResponseEntity<?> findIncomeSummary(long clubId){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 클럽이 없습니다.");
+        }
+        ClubEntity club = clubOpt.get();
+        Long mainAccountId = club.getClubMainAccountId();
+        if(mainAccountId==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("클럽 메인게좌가 설정되지 않았습니다.");
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
+
+        List<IncomeSummaryDto> response = transactionRepository.findIncomeSummary(clubId,startOfMonth,now);
+
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> findExpenseSummary(long clubId){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 클럽이 없습니다.");
+        }
+        ClubEntity club = clubOpt.get();
+        Long mainAccountId = club.getClubMainAccountId();
+        if(mainAccountId==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("클럽 메인계좌가 설정되지 않았습니다.");
+        }
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
+        List<ExpenseSummaryDto> response = transactionRepository.findExpenseSummary(clubId,startOfMonth,now);
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> findMonthlyDataSummary(long clubId){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 클럽이 없습니다.");
+        }
+        ClubEntity club = clubOpt.get();
+        Long mainAccountId = club.getClubMainAccountId();
+        if(mainAccountId==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("클럽 메인계좌가 설정되지 않았습니다.");
+        }
+        List<MonthlyDataDto> response = new ArrayList<>();
+
+        YearMonth now = YearMonth.now();
+        YearMonth oneYearAgo = now.minusMonths(12);
+        for (YearMonth month = oneYearAgo; month.isBefore(now); month = month.plusMonths(1)) {
+            LocalDateTime startDate = month.atDay(1).atStartOfDay();
+            LocalDateTime endDate = month.atEndOfMonth().atTime(23, 59, 59);
+
+            long income = transactionRepository.getMonthlyIncomeByAccountId(mainAccountId, startDate, endDate);
+            long expense = transactionRepository.getMonthlyExpenseByAccountId(mainAccountId, startDate, endDate);
+
+            response.add(new MonthlyDataDto(month, income, expense));
         }
         return ResponseEntity.ok(response);
     }
