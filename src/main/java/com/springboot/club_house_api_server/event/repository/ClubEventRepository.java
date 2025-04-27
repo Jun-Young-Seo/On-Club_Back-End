@@ -64,5 +64,4 @@ public interface ClubEventRepository extends JpaRepository<ClubEventEntity,Long>
     List<ClubEventEntity> findEventsByUserIdWithinDateRange(@Param("userId") Long userId,
                                                   @Param("startDate") LocalDateTime startDate,
                                                   @Param("endDate") LocalDateTime endDate);
-
 }
