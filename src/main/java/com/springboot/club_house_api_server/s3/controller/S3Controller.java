@@ -14,6 +14,7 @@ public class S3Controller {
 
     @PostMapping("/upload-file")
     public String uploadFile(@ModelAttribute S3UploadDto dto) {
+        System.out.println(dto.toString());
         try {
             String filePublicUrl = s3Service.uploadFile(dto);
             return "File 업로드 성공 : " + filePublicUrl;

@@ -58,8 +58,8 @@ public class UserService {
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 틀렸습니다.");
         }
-        long accessTokenValidity = 1000 * 60 * 15 * 4  ; // 15분 - accessToken
-        long refreshTokenValidity = 1000 * 60 * 60 * 24 * 7 ; // 24시간 - RefreshToken 확정 후 상수화 할 것
+        long accessTokenValidity = 1000 * 60 * 15 * 4  ; // 15분 * 4 - accessToken
+        long refreshTokenValidity = 1000 * 60 * 60 * 24 * 7 ; // 24 * 7시간 - RefreshToken 확정 후 상수화 할 것
         String userId = String.valueOf(user.getUserId());
         //setSubject는 String형으로 받으므로 valueOf
         String accessToken = jwtTokenGenerator.createToken(userId, accessTokenValidity);
