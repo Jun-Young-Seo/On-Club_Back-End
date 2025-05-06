@@ -45,14 +45,28 @@ public class BudgetService {
     public ResponseEntity<?> readBudgetExcel(ExcelDto requestDto) {
         int firstRowNum = 12; //카카오뱅크 내보내기 엑셀 파일은 12행부터 데이터가 시작됨
         List<TransactionEntity> transactionEntityList = new ArrayList<>(); //save All 호출용 리스트
-        ClubAccountEntity account = clubAccountRepository.findById(requestDto.getAccountId())
-                .orElseThrow(() -> new IllegalArgumentException("Account ID에 해당하는 계좌가 없습니다 Account ID: " + requestDto.getAccountId()));
 
-        ClubEntity club = clubRepository.findById(requestDto.getClubId())
-                .orElseThrow(() -> new IllegalArgumentException("Club ID에 해당하는 동호회가 없습니다. Club ID: " + requestDto.getClubId()));
+        Optional<ClubAccountEntity> clubAccountOpt = clubAccountRepository.findById(requestDto.getClubId());
+        Optional<ClubEntity> clubOpt = clubRepository.findById(requestDto.getClubId());
+        Optional<UserEntity> userOpt = userRepository.findById(requestDto.getUserId());
+
+        if(clubAccountOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account Id에 해당하는 계좌가 없습니다.");
+        }
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Club Id에 해당하는 클럽이 없습니다.");
+        }
+        if(userOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId에 해당하는 유저가 없습니다.");
+        }
+        ClubAccountEntity account = clubAccountOpt.get();
+        ClubEntity club = clubOpt.get();
+        UserEntity user = userOpt.get();
+        long userId = user.getUserId();
 
         MultipartFile file = requestDto.getExcelFile();
         String password = requestDto.getExcelFilePassword();
+
         ResponseEntity<?> response;//오류 응답용
         DataFormatter dataFormatter = new DataFormatter();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
@@ -65,12 +79,8 @@ public class BudgetService {
         if (!originalFilename.endsWith(".xlsx")) {
             response = excelException(HttpStatus.BAD_REQUEST,".xlsx 확장자 파일만 업로드 할 수 있습니다.");
         }
+
         //S3업로드를 위한 예외처리 우선
-        long userId = requestDto.getUserId();
-        Optional<UserEntity> userEntity = userRepository.findById(userId);
-        if(userEntity.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("userId에 해당하는 유저가 없습니다.");
-        }
         try (InputStream fis = file.getInputStream();
              POIFSFileSystem fs = new POIFSFileSystem(fis)) {
 
