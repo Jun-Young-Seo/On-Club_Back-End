@@ -43,10 +43,10 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
-        String bearerPrefix = "Bearer ";
-        String refreshToken = authHeader.substring(bearerPrefix.length()).trim();
+//        String bearerPrefix = "Bearer ";
+//        String refreshToken = authHeader.substring(bearerPrefix.length()).trim();
 
-        String logoutMsg = userService.logout(refreshToken);
+        String logoutMsg = userService.logout(authHeader);
         return ResponseEntity.ok(logoutMsg);
     }
 
