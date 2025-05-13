@@ -14,12 +14,15 @@ import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,19 +36,30 @@ public class ParticipantService {
     private final MembershipRepository membershipRepository;
 
     @Transactional
-    public void joinToEvent(long userId, long eventId) {
-
-        ClubEventEntity event = clubEventRepository.findByEventId(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("eventId에 해당하는 이벤트가 없습니다."));
+    public ResponseEntity<?> joinToEvent(long userId, long eventId) {
 
 
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("userId에 해당하는 유저가 없습니다."));
+        Optional<ClubEventEntity> eventOpt = clubEventRepository.findById(eventId);
+        if (eventOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("eventId에 해당하는 이벤트가 없습니다.");
+        }
+        ClubEventEntity event = eventOpt.get();
+
+        Optional<UserEntity> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId에 해당하는 유저가 없습니다.");
+        }
+
+        UserEntity user = userOpt.get();
 
         long clubId = event.getClub().getClubId();
 
-        MembershipEntity membership = membershipRepository.getMembershipEntityByUserIdAndClubId(userId,clubId)
-                .orElseThrow(()-> new IllegalArgumentException("MembershipId에 해당하는 membership이 없습니다."));
+        Optional<MembershipEntity>membershipOpt = membershipRepository.getMembershipEntityByUserIdAndClubId(userId,clubId);
+
+        if(membershipOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("MembershipId에 해당하는 membership이 없습니다.");
+        }
+        MembershipEntity membership = membershipOpt.get();
 
         membership.setAttendanceCount(membership.getAttendanceCount()+1);
         membershipRepository.save(membership);
@@ -57,6 +71,8 @@ public class ParticipantService {
                 .build();
 
         participantRepository.save(p);
+
+        return ResponseEntity.ok("");
     }
 
     public ResponseEntity<?> getAllParticipantsByEventId(long eventId) {

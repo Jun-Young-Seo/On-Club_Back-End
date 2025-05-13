@@ -14,8 +14,7 @@ public class ParticipantController {
 
     @PostMapping("/join")
     public ResponseEntity<?> joinToEvent(@RequestParam long userId, @RequestParam long eventId) {
-        participantService.joinToEvent(userId, eventId);
-        return ResponseEntity.ok().build();
+        return participantService.joinToEvent(userId, eventId);
     }
 
     @GetMapping("/all")
