@@ -96,6 +96,7 @@ public class UserService {
         if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
             throw new IllegalArgumentException("Invalid Refresh Token");
         }
+
         String userId = jwtTokenGenerator.getUserId(refreshToken);
         Optional<UserEntity> user = userRepository.findById(Long.valueOf(userId));
 

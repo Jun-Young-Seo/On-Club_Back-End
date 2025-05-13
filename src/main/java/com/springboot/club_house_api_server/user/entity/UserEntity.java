@@ -43,7 +43,7 @@ public class UserEntity {
     private LocalDateTime createdAt;
 
     //토큰 위변조 검증용 db저장필드
-    @Column(name ="refresh_token")
+    @Column(name ="refresh_token", columnDefinition = "TEXT")
     private String refreshToken;
 
     @Column(name="region", nullable = false, length = 50)
