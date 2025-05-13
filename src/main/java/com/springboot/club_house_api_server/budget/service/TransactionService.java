@@ -241,6 +241,9 @@ public class TransactionService {
         LocalDate today = LocalDate.now();
         LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
         LocalDateTime now = LocalDateTime.now();
+        System.out.println("startDate = " + startOfMonth);
+        System.out.println("endDate = " + now);
+
         List<ExpenseSummaryDto> response = transactionRepository.findExpenseSummary(clubId,startOfMonth,now);
         return ResponseEntity.ok(response);
     }

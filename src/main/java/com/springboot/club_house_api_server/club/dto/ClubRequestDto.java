@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @Data
 public class ClubRequestDto {
+    private long userId;
     private String clubName;
     private String clubDescription;
     private String clubLogoURL;

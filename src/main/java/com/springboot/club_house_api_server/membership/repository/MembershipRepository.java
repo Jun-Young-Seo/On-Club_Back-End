@@ -27,4 +27,6 @@ public interface MembershipRepository extends JpaRepository<MembershipEntity,Lon
     @Query("SELECT m.user.userId FROM MembershipEntity m WHERE m.club.clubId = :clubId AND (m.role = 'MANAGER' OR m.role = 'LEADER')")
     List<Long> findUserIdsOfManagersAndLeadersByClubId(@Param("clubId") Long clubId);
 
+    @Query("SELECT m.user.userId FROM MembershipEntity  m WHERE m.club.clubId = :clubId")
+    List<Long> findUserIdsOfAllRolesByClubId(@Param("clubId") Long clubId);
 }

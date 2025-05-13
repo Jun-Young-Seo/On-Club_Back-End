@@ -5,8 +5,15 @@ import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.event.dto.ClubEventDto;
 import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
+import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
+import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
+import com.springboot.club_house_api_server.notification.dto.NotificationSendDto;
+import com.springboot.club_house_api_server.notification.entity.NotificationEntity;
+import com.springboot.club_house_api_server.notification.repository.NotificationRepository;
+import com.springboot.club_house_api_server.notification.service.NotificationService;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,17 +30,37 @@ public class ClubEventService {
     private final ClubEventRepository clubEventRepository;
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
+    private final MembershipRepository membershipRepository;
+    private final NotificationService notificationService;
 
+    @Transactional
     //이벤트 추가하기
     public ResponseEntity<?> addEvent(long clubId, LocalDateTime startTime, LocalDateTime endTime, String description){
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
-        System.out.println("clubId : "+clubId);
+//        System.out.println("clubId : "+clubId);
         if(clubOpt.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("클럽 ID와 일치하는 클럽이 없습니다.");
         }
         ClubEntity club = clubOpt.get();
+        String clubName = club.getClubName();
         ClubEventEntity clubEvent = new ClubEventEntity(club,startTime,endTime,description);
 
+        List<MembershipEntity> clubMembers = membershipRepository.findAllMembershipsByClubId(clubId);
+        if(clubMembers.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("클럽에 가입된 유저가 없습니다.");
+        }
+        List<Long> memberIds = membershipRepository.findUserIdsOfAllRolesByClubId(clubId);
+        NotificationSendDto sendDto = NotificationSendDto.builder()
+                .type(NotificationEntity.NotificationType.NOTICE)
+                .message("신규 클럽 일정이 생성되었습니다. :" +description)
+                .title("클럽 신규 일정")
+                .sender(clubName)
+                .userIdList(memberIds)
+                .referenceId(null)
+                .targetId(clubId)
+                .build();
+        notificationService.sendNotification(sendDto);
         clubEventRepository.save(clubEvent);
         return ResponseEntity.status(HttpStatus.OK).body("이벤트가 정상적으로 추가되었습니다.");
     }

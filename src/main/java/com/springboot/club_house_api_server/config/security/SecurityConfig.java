@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 "/api/membership/join/request", "/api/membership/my-role"
                                 ,"/api/membership/withdraw","/api/notification/**", "/api/user/info",
                                 "/api/membership/join/direct-user","/api/membership/join/direct-not-user", "/api/s3/upload-file"
-                        ,"/api/participant/**").permitAll()
+                        ,"/api/participant/**", "/api/openai/**").permitAll()
                         .requestMatchers("/api/budget/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/chart/**").hasAnyRole("MANAGER","LEADER")
                         .requestMatchers("/club/**").hasAnyRole("LEADER","MANAGER")
@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/excel/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/game/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/membership/**").hasAnyRole("LEADER","MANAGER")
-                        .requestMatchers("/api/openai/**").hasAnyRole("LEADER","MANAGER")
+//                        .requestMatchers("/api/openai/**").hasAnyRole("LEADER","MANAGER")
 //                        .requestMatchers("/api/participant/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/s3/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/guest/**").hasAnyRole("LEADER","MANAGER")

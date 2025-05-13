@@ -16,8 +16,7 @@ public class S3Controller {
     public String uploadFile(@ModelAttribute S3UploadDto dto) {
         System.out.println(dto.toString());
         try {
-            String filePublicUrl = s3Service.uploadFile(dto);
-            return "File 업로드 성공 : " + filePublicUrl;
+            return s3Service.uploadFile(dto);
         } catch (Exception e) {
             e.printStackTrace();
             return "File upload failed!";

@@ -1,7 +1,6 @@
 package com.springboot.club_house_api_server.guest.service;
 
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
-import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
 import com.springboot.club_house_api_server.guest.entity.GuestEntity;
@@ -17,7 +16,6 @@ import com.springboot.club_house_api_server.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +51,7 @@ public class GuestService {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 참석한 유저입니다.");
         }
         //중복 신청 방지 로직
-        if(notificationRepository.existsJoinRequest(userId,eventId,NotificationEntity.NotificationType.GUEST_REQUEST)){
+        if(notificationRepository.alreadyRequestExisted(userId,eventId,NotificationEntity.NotificationType.GUEST_REQUEST)){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 게스트 참여 신청 했습니다.");
         }
 
