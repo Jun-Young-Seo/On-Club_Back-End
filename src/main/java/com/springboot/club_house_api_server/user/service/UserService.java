@@ -96,10 +96,10 @@ public class UserService {
         if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
             throw new IllegalArgumentException("Invalid Refresh Token");
         }
-        String userTel = jwtTokenGenerator.getUserId(refreshToken);
-        Optional<UserEntity> user = userRepository.findByUserTel(userTel);
+        String userId = jwtTokenGenerator.getUserId(refreshToken);
+        Optional<UserEntity> user = userRepository.findById(Long.valueOf(userId));
 
-        if(!user.isPresent()){
+        if(user.isEmpty()){
             throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
         }
         if(!user.get().getRefreshToken().equals(refreshToken)){
@@ -109,7 +109,7 @@ public class UserService {
         user.get().setRefreshToken(null);
         userRepository.save(user.get());
 
-        return userTel+" 정상적으로 로그아웃 됐습니다.";
+        return user.get().getUserName()+" 님이 정상적으로 로그아웃 됐습니다.";
     }
 
     //유저 정보 리턴
