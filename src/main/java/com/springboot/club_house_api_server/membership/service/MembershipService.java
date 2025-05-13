@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +56,7 @@ public class MembershipService {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 이 클럽에 가입한 사용자입니다.");
         }
         //중복 가입신청 쪽지폭탄 방지
-        if(notificationRepository.existsJoinRequest(userId,clubId, NotificationEntity.NotificationType.JOIN_REQUEST)){
+        if(notificationRepository.alreadyRequestExisted(userId,clubId, NotificationEntity.NotificationType.JOIN_REQUEST)){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 가입신청 했습니다.");
         }
 

@@ -154,7 +154,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     //For Dashboard Chart Data -- Income
     @Query("SELECT new com.springboot.club_house_api_server.budget.dto.IncomeSummaryDto(t.transactionDetail, SUM(t.transactionAmount)) " +
             "FROM TransactionEntity t " +
-            "WHERE t.transactionType = '입금' AND t.club.clubId = :clubId " +
+            "WHERE TRIM(t.transactionType) = '입금' AND t.club.clubId = :clubId " +
             "AND t.transactionDate BETWEEN :startDate AND :endDate " +
             "GROUP BY t.transactionDetail")
     List<IncomeSummaryDto> findIncomeSummary(@Param("clubId") long clubId,
@@ -164,7 +164,7 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     //For Dashboard Chart Data - Expense
     @Query("SELECT new com.springboot.club_house_api_server.budget.dto.ExpenseSummaryDto(t.transactionDetail, SUM(t.transactionAmount)) " +
             "FROM TransactionEntity t " +
-            "WHERE t.transactionType = '출금' AND t.club.clubId = :clubId " +
+            "WHERE TRIM(t.transactionType) = '출금' AND t.club.clubId = :clubId " +
             "AND t.transactionDate BETWEEN :startDate AND :endDate " +
             "GROUP BY t.transactionDetail")
     List<ExpenseSummaryDto> findExpenseSummary(@Param("clubId") long clubId,
