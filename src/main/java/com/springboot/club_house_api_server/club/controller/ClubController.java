@@ -19,6 +19,7 @@ public class ClubController {
     @PostMapping("/add")
     public ResponseEntity<?> addClub(@RequestBody ClubRequestDto clubRequestDto){
         return clubService.addClub(
+                clubRequestDto.getUserId(),
                 clubRequestDto.getClubName(),
                 clubRequestDto.getClubDescription(),
                 clubRequestDto.getClubLogoURL(),

@@ -26,4 +26,9 @@ public class ParticipantController {
     public ResponseEntity<?> updateParticipant( @RequestParam long eventId) {
         return participantService.updateParticipants(eventId);
     }
+
+    @GetMapping("/all/by_user_id")
+    public ResponseEntity<?> getAllParticipantsByUserId(@RequestParam long userId) {
+        return participantService.findAllEventsByUserId(userId);
+    }
 }

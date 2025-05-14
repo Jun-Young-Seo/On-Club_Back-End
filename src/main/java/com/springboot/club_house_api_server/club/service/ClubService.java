@@ -6,7 +6,9 @@ import com.springboot.club_house_api_server.club.account.repository.ClubAccountR
 import com.springboot.club_house_api_server.club.dto.SearchClubResponseDto;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
+import com.springboot.club_house_api_server.membership.service.MembershipService;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
+import com.springboot.club_house_api_server.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
@@ -26,6 +28,8 @@ import java.util.Optional;
 public class ClubService {
     private final ClubRepository clubRepository;
     private final ClubAccountRepository clubAccountRepository;
+    private final UserRepository userRepository;
+    private final MembershipService membershipService;
 
     //모든 클럽 조회 메서드
     //이 메서드는 사용자 가입 여부와 관계 없이 모든 클럽 반환 --> FE 렌더링용
@@ -55,13 +59,18 @@ public class ClubService {
         }
         return ResponseEntity.noContent().build(); //HTTP 204 No Content
     }
-    //동호회 신규 생성 - 중복 이름 생성 불가능
-    public ResponseEntity<?> addClub(String clubName, String clubDescription, String clubLogoURL, String clubBackgroundURL) {
+
+    //동호회 신규 생성 - 중복 이름 생성 불가능 + 만든 사람은 자동 LEADER 배정
+    public ResponseEntity<?> addClub(Long userId, String clubName, String clubDescription, String clubLogoURL, String clubBackgroundURL) {
         Optional<ClubEntity> clubOpt = clubRepository.findByClubName(clubName);
         if (clubOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 있는 클럽 이름입니다.");
         }
+        Optional<UserEntity> userOpt = userRepository.findById(userId);
 
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("user ID에 해당하는 user가 없습니다.");
+        }
         ClubEntity club = new ClubEntity(clubName, clubDescription);
         if(clubLogoURL!=null && !clubLogoURL.equals("")) {
             club.setClubLogoURL(clubLogoURL);
@@ -71,7 +80,9 @@ public class ClubService {
             club.setClubBackgroundURL(clubBackgroundURL);
         }
 
-        clubRepository.save(club);
+        ClubEntity addedClub = clubRepository.save(club);
+        membershipService.assignLeaderWhenClubCreated(userId,addedClub.getClubId());
+
         return ResponseEntity.ok(club);
     }
 
