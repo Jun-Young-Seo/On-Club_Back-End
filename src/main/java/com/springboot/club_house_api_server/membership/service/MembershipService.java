@@ -232,37 +232,24 @@ public class MembershipService {
     }
 
     @Transactional
-    //운영진용 멤버십 가입 API -> 승인 없이 바로
-    public ResponseEntity<?> joinMembershipDirect(long userId, long clubId){
+    //Club 최초 생성시 생성 User가 LEADER가 되게 하는 함수
+    public void assignLeaderWhenClubCreated(long userId, long clubId){
         Optional<UserEntity> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId를 확인해주세요.");
-        }
         //클럽 확인
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
-        if (clubOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId를 확인해주세요.");
-        }
-        //중복가입 확인
-        Optional<MembershipEntity> existingMembership = membershipRepository.getMembershipEntityByUserIdAndClubId(userId, clubId);
-        if (existingMembership.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 이 클럽에 가입한 사용자입니다.");
-        }
         UserEntity user = userOpt.get();
         ClubEntity club = clubOpt.get();
 
         MembershipEntity membershipEntity = MembershipEntity.builder()
                 .club(club)
                 .user(user)
-                .role(MembershipEntity.RoleType.REGULAR)
+                .role(MembershipEntity.RoleType.LEADER)
                 .build();
         membershipRepository.save(membershipEntity);
-
-        return ResponseEntity.ok(membershipEntity.getMembershipId());
     }
 
     @Transactional
-    //운영진용 직통가입 - 서비스 유저이지만 멤버십이 아닌 경우 강제로 가입시키면서 멤버십 추가까지
+    //운영진용 직통가입 - 서비스 유저이지만 멤버십이 아닌 경우 Club에 바로 가입
     public ResponseEntity<?> joinDirectMembershipWhenUserExist(String userTel, long clubId){
         Optional<UserEntity> userOpt = userRepository.findByUserTel(userTel);
         if(userOpt.isEmpty()){

@@ -5,8 +5,10 @@ import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
 import com.springboot.club_house_api_server.game.entity.GameParticipantEntity;
 import com.springboot.club_house_api_server.game.repository.GameParticipantRepository;
+import com.springboot.club_house_api_server.guest.repository.GuestRepository;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
+import com.springboot.club_house_api_server.participant.dto.FindAllEventsDto;
 import com.springboot.club_house_api_server.participant.dto.ParticipantResponseDto;
 import com.springboot.club_house_api_server.participant.entity.ParticipantEntity;
 import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
@@ -34,6 +36,7 @@ public class ParticipantService {
     private final ClubEventRepository clubEventRepository;
     private final GameParticipantRepository gameParticipantRepository;
     private final MembershipRepository membershipRepository;
+    private final GuestRepository guestRepository;
 
     @Transactional
     public ResponseEntity<?> joinToEvent(long userId, long eventId) {
@@ -115,5 +118,39 @@ public class ParticipantService {
         }
         return ResponseEntity.ok(response);
 
+    }
+
+    public ResponseEntity<?> findAllEventsByUserId(long userId) {
+        Optional<UserEntity> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("user ID에 해당하는 User가 없습니다.");
+        }
+        List<ClubEventEntity> allEventsIds = participantRepository.findAllEventIdsByUserId(userId);
+        List<FindAllEventsDto> response = new ArrayList<>();
+        //Membership으로써 참가하게 된 경우
+        for(ClubEventEntity c : allEventsIds){
+            FindAllEventsDto fDto = new FindAllEventsDto();
+            fDto.setUserId(userId);
+            fDto.setEventId(c.getEventId());
+            fDto.setEventDescription(c.getEventDescription());
+            fDto.setEventStartTime(c.getEventStartTime());
+            fDto.setEventEndTime(c.getEventEndTime());
+            fDto.setClubName(c.getClub().getClubName());
+            response.add(fDto);
+        }
+
+        List<Long> guestEvents = guestRepository.findAllGuestEventsByUserId(userId);
+        for(Long g : guestEvents){
+            ClubEventEntity c = clubEventRepository.findById(g).get();
+            FindAllEventsDto fDto = new FindAllEventsDto();
+            fDto.setEventId(c.getEventId());
+            fDto.setEventDescription(c.getEventDescription());
+            fDto.setEventStartTime(c.getEventStartTime());
+            fDto.setEventEndTime(c.getEventEndTime());
+            fDto.setClubName(c.getClub().getClubName());
+            fDto.setUserId(userId);
+            response.add(fDto);
+        }
+        return ResponseEntity.ok(response);
     }
 }
