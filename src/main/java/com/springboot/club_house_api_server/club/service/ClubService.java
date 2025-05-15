@@ -3,6 +3,7 @@ package com.springboot.club_house_api_server.club.service;
 import com.springboot.club_house_api_server.club.account.dto.ClubAccountDto;
 import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
 import com.springboot.club_house_api_server.club.account.repository.ClubAccountRepository;
+import com.springboot.club_house_api_server.club.dto.ModifyTagDto;
 import com.springboot.club_house_api_server.club.dto.SearchClubResponseDto;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
@@ -185,5 +186,28 @@ public class ClubService {
         return ResponseEntity.ok(response);
     }
 
+    public ResponseEntity<?> findAllTagsByClubId(long clubId){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 club이 없습니다.");
+        }
 
+        List<String> tags = clubRepository.findTagsByClubId(clubId);
+        return ResponseEntity.ok(tags);
+    }
+
+    public ResponseEntity<?> setClubTagsByClubId(ModifyTagDto modifyTagDto){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(modifyTagDto.getClubId());
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 club이 없습니다.");
+        }
+
+        ClubEntity club = clubOpt.get();
+        club.setClubTagOne(modifyTagDto.getTagOne());
+        club.setClubTagTwo(modifyTagDto.getTagTwo());
+        club.setClubTagThree(modifyTagDto.getTagThree());
+        clubRepository.save(club);
+
+        return ResponseEntity.ok(club.getClubTagOne()+", "+club.getClubTagTwo()+", "+club.getClubTagThree());
+    }
 }

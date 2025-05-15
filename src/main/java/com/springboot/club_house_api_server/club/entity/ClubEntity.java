@@ -57,6 +57,15 @@ public class ClubEntity {
     @Column(name="club_main_account", nullable = true)
     private Long clubMainAccountId;
 
+    @Column(name = "tag_one")
+    private String clubTagOne;
+
+    @Column(name = "tag_two")
+    private String clubTagTwo;
+
+    @Column(name = "tag_three")
+    private String clubTagThree;
+
     //---------Relation 용 필드들------------------
     // 양방향 매핑 - 클럽에서 거래 내역 조회 가능
     @OneToMany(mappedBy = "club", fetch = FetchType.LAZY)
