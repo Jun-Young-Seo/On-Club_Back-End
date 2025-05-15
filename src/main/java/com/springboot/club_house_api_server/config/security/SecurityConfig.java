@@ -80,13 +80,18 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));  //react 로컬 허용--> 나중에 배포후 변경필요
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://on-club.co.kr",
+                "https://www.on-club.co.kr"
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("*"));  // 모든 헤더 허용
-        configuration.setAllowCredentials(true);  // 쿠키 포함 허용 -- JWT HTTP Only 쿠키로 쓸 예정
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }
