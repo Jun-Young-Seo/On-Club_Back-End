@@ -14,7 +14,8 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")  // React 프론트엔드 허용
+//                        .allowedOrigins("http://localhost:3000")  // React 프론트엔드 허용
+                        .allowedOrigins("http://localhost:3000", "https://on-club.co.kr")
                         .allowedMethods("GET", "POST", "PUT", "DELETE","OPTIONS", "PATCH")  // 허용할 HTTP 메서드
                         .allowedHeaders("Authorization","Content-Type")
                         .allowCredentials(true);  // 쿠키 및 인증 정보 포함 허용
