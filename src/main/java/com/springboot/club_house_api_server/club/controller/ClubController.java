@@ -1,6 +1,7 @@
 package com.springboot.club_house_api_server.club.controller;
 
 import com.springboot.club_house_api_server.club.dto.ClubRequestDto;
+import com.springboot.club_house_api_server.club.dto.ModifyTagDto;
 import com.springboot.club_house_api_server.club.dto.SearchClubResponseDto;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.service.ClubService;
@@ -62,5 +63,15 @@ public class ClubController {
     @GetMapping("/get/main-account")
     public ResponseEntity<?> getMainAccount(@RequestParam long clubId){
         return clubService.getMainAccount(clubId);
+    }
+
+    @GetMapping("/get/tags")
+    public ResponseEntity<?> getTags(@RequestParam long clubId){
+        return clubService.findAllTagsByClubId(clubId);
+    }
+
+    @PostMapping("/update/tags")
+    public ResponseEntity<?> modifyTags(@RequestBody ModifyTagDto modifyTagDto){
+        return clubService.setClubTagsByClubId(modifyTagDto);
     }
 }

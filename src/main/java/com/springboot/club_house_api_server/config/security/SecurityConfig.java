@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 "/api/membership/join/request", "/api/membership/my-role"
                                 ,"/api/membership/withdraw","/api/notification/**", "/api/user/info",
                                 "/api/membership/join/direct-user","/api/membership/join/direct-not-user", "/api/s3/upload-file"
-                        ,"/api/participant/**", "/api/openai/**").permitAll()
+                        ,"/api/participant/**", "/api/openai/**", "/api/club/get/tags").permitAll()
                         .requestMatchers("/api/budget/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/chart/**").hasAnyRole("MANAGER","LEADER")
                         .requestMatchers("/club/**").hasAnyRole("LEADER","MANAGER")

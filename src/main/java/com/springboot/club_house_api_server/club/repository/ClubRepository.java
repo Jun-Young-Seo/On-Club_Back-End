@@ -53,4 +53,6 @@ public interface ClubRepository extends JpaRepository<ClubEntity, Long> {
     @Query("SELECT c FROM ClubEntity c JOIN c.memberships m WHERE m.user.userId = :userId ORDER BY c.clubName ASC")
     List<ClubEntity> findClubsByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT c.clubTagOne, c.clubTagTwo, c.clubTagThree FROM ClubEntity c WHERE c.clubId = :clubId")
+    List<String> findTagsByClubId(@Param("clubId") Long clubId);
 }
