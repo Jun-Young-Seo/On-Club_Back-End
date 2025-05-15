@@ -17,4 +17,7 @@ public class SearchClubResponseDto {
     private String clubLogoURL;
     private String clubBackgroundImageURL;
     private LocalDateTime clubWhenCreated;
+    private String tagOne;
+    private String tagTwo;
+    private String tagThree;
 }

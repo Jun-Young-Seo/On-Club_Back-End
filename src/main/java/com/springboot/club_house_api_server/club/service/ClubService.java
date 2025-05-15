@@ -47,7 +47,9 @@ public class ClubService {
             clubDto.setClubLogoURL(club.getClubLogoURL());
             clubDto.setClubBackgroundImageURL(club.getClubBackgroundURL());
             clubDto.setClubWhenCreated(club.getClubCreatedAt());
-
+            clubDto.setTagOne(club.getClubTagOne());
+            clubDto.setTagTwo(club.getClubTagTwo());
+            clubDto.setTagThree(club.getClubTagThree());
             clubs.add(clubDto);
         }
         return ResponseEntity.ok(clubs);
