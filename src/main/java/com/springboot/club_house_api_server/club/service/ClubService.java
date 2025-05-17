@@ -143,6 +143,7 @@ public class ClubService {
     @Transactional
     //동호회 메인 계좌 지정 기능
     public ResponseEntity<?> setMainAccount(long clubId, long accountId){
+        System.out.println("mainaccount modify "+clubId+accountId);
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if(clubOpt.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 CLub이 없습니다.");
@@ -153,9 +154,6 @@ public class ClubService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("account Id에 해당하는 account가 없습니다.");
         }
 
-        if(clubOpt.get().getClubMainAccountId()!=null){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 mainAccount가 있습니다.");
-        }
 
         clubOpt.get().setClubMainAccountId(accountId);
         clubRepository.save(clubOpt.get());

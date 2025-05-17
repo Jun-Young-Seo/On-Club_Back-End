@@ -161,12 +161,14 @@ public class TransactionService {
 
         long income = transactionRepository.getMonthlyIncomeByAccountId(mainAccountId, startOfMonth, now);
         long expense = transactionRepository.getMonthlyExpenseByAccountId(mainAccountId, startOfMonth, now);
+        int balance;
         Optional<TransactionEntity> balanceOpt = transactionRepository.findTopByAccount_AccountIdOrderByTransactionDateDesc(mainAccountId);
         if(balanceOpt.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("balnce err");
+            balance = 0;
         }
-        int balance = balanceOpt.get().getTransactionBalance();
-//        Long balance = transactionRepository.getLatestMonthlyBalanceByAccountId(mainAccountId, startOfMonth, now);
+        else{
+         balance = balanceOpt.get().getTransactionBalance();
+        }
         long monthlySurplus = income - expense;
 
         DashBoardMonthInfoDto response = DashBoardMonthInfoDto.builder()
@@ -223,7 +225,7 @@ public class TransactionService {
         LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
         LocalDateTime now = LocalDateTime.now();
 
-        List<IncomeSummaryDto> response = transactionRepository.findIncomeSummary(clubId,startOfMonth,now);
+        List<IncomeSummaryDto> response = transactionRepository.findIncomeSummary(mainAccountId,startOfMonth,now);
 
         return ResponseEntity.ok(response);
     }
@@ -235,16 +237,16 @@ public class TransactionService {
         }
         ClubEntity club = clubOpt.get();
         Long mainAccountId = club.getClubMainAccountId();
-        if(mainAccountId==null){
+        if(mainAccountId == 0){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("클럽 메인계좌가 설정되지 않았습니다.");
         }
+//        System.out.println("mainAccount : "+mainAccountId);
         LocalDate today = LocalDate.now();
         LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
         LocalDateTime now = LocalDateTime.now();
-        System.out.println("startDate = " + startOfMonth);
-        System.out.println("endDate = " + now);
-
-        List<ExpenseSummaryDto> response = transactionRepository.findExpenseSummary(clubId,startOfMonth,now);
+//        System.out.println("startDate = " + startOfMonth);
+//        System.out.println("endDate = " + now);
+        List<ExpenseSummaryDto> response = transactionRepository.findExpenseSummary(mainAccountId,startOfMonth,now);
         return ResponseEntity.ok(response);
     }
 
