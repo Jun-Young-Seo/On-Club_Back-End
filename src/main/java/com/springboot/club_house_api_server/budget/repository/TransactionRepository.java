@@ -1,13 +1,11 @@
 package com.springboot.club_house_api_server.budget.repository;
 
-import com.springboot.club_house_api_server.budget.dto.BudgetResponseDto;
 import com.springboot.club_house_api_server.budget.dto.ExpenseSummaryDto;
 import com.springboot.club_house_api_server.budget.dto.IncomeSummaryDto;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
 import com.springboot.club_house_api_server.club.account.entity.ClubAccountEntity;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import jakarta.transaction.Transactional;
-import org.apache.commons.math3.analysis.function.Exp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -154,20 +152,20 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     //For Dashboard Chart Data -- Income
     @Query("SELECT new com.springboot.club_house_api_server.budget.dto.IncomeSummaryDto(t.transactionDetail, SUM(t.transactionAmount)) " +
             "FROM TransactionEntity t " +
-            "WHERE TRIM(t.transactionType) = '입금' AND t.club.clubId = :clubId " +
+            "WHERE TRIM(t.transactionType) = '입금' AND t.account.accountId = :accountId " +
             "AND t.transactionDate BETWEEN :startDate AND :endDate " +
             "GROUP BY t.transactionDetail")
-    List<IncomeSummaryDto> findIncomeSummary(@Param("clubId") long clubId,
+    List<IncomeSummaryDto> findIncomeSummary(@Param("accountId") long accountId,
                                              @Param("startDate") LocalDateTime startDate,
                                              @Param("endDate") LocalDateTime endDate);
 
     //For Dashboard Chart Data - Expense
     @Query("SELECT new com.springboot.club_house_api_server.budget.dto.ExpenseSummaryDto(t.transactionDetail, SUM(t.transactionAmount)) " +
             "FROM TransactionEntity t " +
-            "WHERE TRIM(t.transactionType) = '출금' AND t.club.clubId = :clubId " +
+            "WHERE TRIM(t.transactionType) = '출금' AND t.account.accountId = :accountId " +
             "AND t.transactionDate BETWEEN :startDate AND :endDate " +
             "GROUP BY t.transactionDetail")
-    List<ExpenseSummaryDto> findExpenseSummary(@Param("clubId") long clubId,
+    List<ExpenseSummaryDto> findExpenseSummary(@Param("accountId") long accountId,
                                 @Param("startDate") LocalDateTime startDate,
                                 @Param("endDate") LocalDateTime endDate);
 }

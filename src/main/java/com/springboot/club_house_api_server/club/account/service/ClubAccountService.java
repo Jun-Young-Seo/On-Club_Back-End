@@ -37,7 +37,10 @@ public class ClubAccountService {
         if (accountExists) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 클럽에 " + accountName + " 계좌가 존재합니다.");
         }
-        clubAccountRepository.save(clubAccountEntity);
+        ClubAccountEntity newAccount = clubAccountRepository.save(clubAccountEntity);
+        club.setClubMainAccountId(newAccount.getAccountId());
+        club.getAccounts().add(clubAccountEntity);
+        clubRepository.save(club);
 
         return ResponseEntity.ok(club.getClubName()+"에 새로운 계좌 "+accountName+"이 생성되었습니다.");
     }

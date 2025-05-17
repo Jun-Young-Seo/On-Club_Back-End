@@ -48,8 +48,8 @@ public class BudgetController {
     }
 
     @GetMapping("/get/budget-info")
-    public ResponseEntity<?> getBudgetInfo(@RequestParam long clubId){
-        return transactionService.getBudgetInfo(clubId);
+        public ResponseEntity<?> getBudgetInfo(@RequestParam long clubId){
+            return transactionService.getBudgetInfo(clubId);
     }
 
     @GetMapping("/chart-income")
