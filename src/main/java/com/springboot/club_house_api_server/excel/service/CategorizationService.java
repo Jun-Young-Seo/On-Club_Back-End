@@ -44,7 +44,7 @@ public class CategorizationService {
             String description = transaction.getTransactionDescription();
             if (description != null && gptCache.containsKey(description)) {
                 String detail = gptCache.get(description);
-                System.out.println(description+" : "+detail);
+//                System.out.println(description+" : "+detail);
                 transaction.setTransactionDetail(detail);
             }
         }
@@ -76,8 +76,9 @@ public class CategorizationService {
         sb.append("다음 문장은 거래 내역이야.\n");
         sb.append("사람 이름(2~4 글자)이라고 판단되면 회비로 처리해\n");
         sb.append("교통 수단의 이름이면 교통비, 식당의 이름이라면 식비로 처리하자.\n");
+        sb.append("또, 이자는 이자로 처리해줘.\n");
         sb.append("판단하기에 애매하다고 생각되면 ? 필드로 저장해. 무리해서 억지로 추론하지 말고 애매하면 ?로 해.\n\n");
-        sb.append("각 항목은 J순수한 SON 형식으로 반환하고 \"다음은 ~~~입니다.\"와 같이 부연 설명은 붙이지 마.\n");
+        sb.append("각 항목은 순수한 JSON 형식으로 반환하고 \"다음은 ~~~입니다.\"와 같이 부연 설명은 붙이지 마.\n");
         sb.append("또한 추가적인 설명이나 마크다운 표기는 절대 포함되면 안돼.\n");
         sb.append("응답 예시는 다음과 같아:\n");
         sb.append("{ \"XX운수\": \"교통비\", \"XX식당\": \"식비\" }\n\n");

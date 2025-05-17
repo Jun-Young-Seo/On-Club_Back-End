@@ -96,35 +96,36 @@ public class BudgetService {
                  Workbook workbook = WorkbookFactory.create(decryptedStream)) {
 
                 Sheet sheet = workbook.getSheetAt(0);
-                for(int i=firstRowNum; i<=sheet.getLastRowNum(); i++) {
+                for (int i = firstRowNum; i <= sheet.getLastRowNum(); i++) {
                     Row row = sheet.getRow(i);
-                    if(row==null){
-                        continue;
-                    }
-                    String transactionDate = dataFormatter.formatCellValue(row.getCell(1));//2024.10.16 18:04:40
-                    LocalDateTime parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
-                    //DB에 이미 저장되어 있는 거래내역인지 먼저 체크
-                    boolean alreadySaved = transactionRepository.isAlreadySavedTransaction(account,club,parsedDate);
-                    //있다면 루프 건너뛰기
-                    if(alreadySaved){
-                        continue;
-                    }
-                    for(Cell cell : row) {
-                        String transactionType = dataFormatter.formatCellValue(row.getCell(2));//입금/출금
-                        int transactionAmount = parseInt(dataFormatter.formatCellValue(row.getCell(3)));//거래 금액 량
-                        int transactionBalance = parseInt(dataFormatter.formatCellValue(row.getCell(4)));//거래 후 잔액
-                        String transactionCategory = dataFormatter.formatCellValue(row.getCell(5));//일반입금, 일반이체, 이자 등으로 구분되는 필드
-                        String transactionDescription    = dataFormatter.formatCellValue(row.getCell(6));//받는 분 통장에 표시할 내용이 저장되는 필드
-                        String transactionMemo = dataFormatter.formatCellValue(row.getCell(7));//카카오뱅크 거래내역 메모 기능을 썼다면 저장되어있음
-//                        parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
-                        //없는 경우에만 저장
-                        TransactionEntity oneRow = new TransactionEntity(account, club, parsedDate,transactionType,transactionAmount,
-                                transactionBalance,transactionCategory,transactionDescription,transactionMemo,null);
+                    if (row == null) continue;
 
-                        transactionEntityList.add(oneRow);
-                    }
+                    String transactionDate = dataFormatter.formatCellValue(row.getCell(1)); // ex: "2024.10.16 18:04:40"
+                    LocalDateTime parsedDate = LocalDateTime.parse(transactionDate, dateTimeFormatter);
+
+                    // 중복 여부 확인
+                    boolean alreadySaved = transactionRepository.isAlreadySavedTransaction(account, club, parsedDate);
+                    if (alreadySaved) continue;
+
+                    // 셀에서 값 추출
+                    String transactionType = dataFormatter.formatCellValue(row.getCell(2));
+                    int transactionAmount = parseInt(dataFormatter.formatCellValue(row.getCell(3)));
+                    int transactionBalance = parseInt(dataFormatter.formatCellValue(row.getCell(4)));
+                    String transactionCategory = dataFormatter.formatCellValue(row.getCell(5));
+                    String transactionDescription = dataFormatter.formatCellValue(row.getCell(6));
+                    String transactionMemo = dataFormatter.formatCellValue(row.getCell(7));
+
+                    // 엔티티 생성 및 리스트 추가
+                    TransactionEntity oneRow = new TransactionEntity(
+                            account, club, parsedDate,
+                            transactionType, transactionAmount, transactionBalance,
+                            transactionCategory, transactionDescription, transactionMemo, null
+                    );
+                    transactionEntityList.add(oneRow);
                 }
+
                 transactionEntityList = categorizationService.categorizeTransactions(transactionEntityList);
+                System.out.println(transactionEntityList.size());
                 transactionRepository.saveAll(transactionEntityList);
 
                 //S3 업로드 로직 시작
@@ -147,6 +148,7 @@ public class BudgetService {
             return excelException(HttpStatus.UNAUTHORIZED,"파일을 읽는 도중 문제 발생"+e.getMessage());
         }
     }
+
     public ResponseEntity<?> excelException(HttpStatus status, String message) {
         return ResponseEntity.status(status).body(message);
     }
