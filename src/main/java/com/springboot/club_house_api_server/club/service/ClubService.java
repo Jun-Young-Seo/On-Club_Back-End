@@ -130,13 +130,16 @@ public class ClubService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("club Id에 해당하는 클럽이 없습니다.");
         }
         SearchClubResponseDto dto = new SearchClubResponseDto();
-        dto.setClub_id(clubOpt.get().getClubId());
-        dto.setClubName(clubOpt.get().getClubName());
-        dto.setClubDescription(clubOpt.get().getClubDescription());
-        dto.setClubLogoURL(clubOpt.get().getClubLogoURL());
-        dto.setClubBackgroundImageURL(clubOpt.get().getClubBackgroundURL());
-        dto.setClubWhenCreated(clubOpt.get().getClubCreatedAt());
-
+        ClubEntity club = clubOpt.get();
+        dto.setClub_id(club.getClubId());
+        dto.setClubName(club.getClubName());
+        dto.setClubDescription(club.getClubDescription());
+        dto.setClubLogoURL(club.getClubLogoURL());
+        dto.setClubBackgroundImageURL(club.getClubBackgroundURL());
+        dto.setClubWhenCreated(club.getClubCreatedAt());
+        dto.setTagOne(club.getClubTagOne());
+        dto.setTagTwo(club.getClubTagTwo());
+        dto.setTagThree(club.getClubTagThree());
         return ResponseEntity.ok(dto);
     }
 
