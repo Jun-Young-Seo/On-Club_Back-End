@@ -40,5 +40,5 @@ jobs:
           docker images | grep "onclub-api" | awk '{print $3}' | tail -n +2 | xargs -r docker rmi -f
 
           #  새로운 컨테이너 실행
-          docker run -d --name onclub-api -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest
+          docker run -d --name onclub-api -p 127.0.0.1:8080:8080 ${{ secrets.DOCKER_USERNAME }}/onclub-api:latest
         EOF
