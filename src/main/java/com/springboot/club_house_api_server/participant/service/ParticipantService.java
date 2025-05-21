@@ -40,8 +40,6 @@ public class ParticipantService {
 
     @Transactional
     public ResponseEntity<?> joinToEvent(long userId, long eventId) {
-
-
         Optional<ClubEventEntity> eventOpt = clubEventRepository.findById(eventId);
         if (eventOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("eventId에 해당하는 이벤트가 없습니다.");
@@ -80,6 +78,7 @@ public class ParticipantService {
 
     public ResponseEntity<?> getAllParticipantsByEventId(long eventId) {
         List<ParticipantEntity> participantEntityList = participantRepository.findByEventId(eventId);
+        List<Long> guestList = guestRepository.findAllGuestEventsByEventId(eventId);
         List<ParticipantResponseDto> response = new ArrayList<>();
         for(ParticipantEntity participantEntity : participantEntityList) {
             UserEntity user = participantEntity.getUser();
@@ -91,6 +90,19 @@ public class ParticipantService {
                     .career(user.getCareer())
                     .build();
             response.add(dto);
+        }
+        if(!guestList.isEmpty()) {
+            for (Long guestId : guestList) {
+                UserEntity user = userRepository.findById(guestId).get();
+                ParticipantResponseDto dto = ParticipantResponseDto.builder()
+                        .userId(user.getUserId())
+                        .lastGamedAt(LocalDateTime.now())
+                        .userName(user.getUserName())
+                        .gender(user.getGender())
+                        .career(user.getCareer())
+                        .build();
+                response.add(dto);
+            }
         }
         return ResponseEntity.ok(response);
     }

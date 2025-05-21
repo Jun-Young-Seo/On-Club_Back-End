@@ -17,4 +17,7 @@ public interface GuestRepository extends JpaRepository<GuestEntity, Long> {
 
     @Query("SELECT g.event.eventId FROM GuestEntity g where g.user.userId = :userId")
     List<Long> findAllGuestEventsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT g.user.userId FROM GuestEntity g where g.event.eventId = :eventId")
+    List<Long> findAllGuestEventsByEventId(@Param("eventId") Long eventId);
 }
