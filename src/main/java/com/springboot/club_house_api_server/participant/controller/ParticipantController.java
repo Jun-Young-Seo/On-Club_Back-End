@@ -31,4 +31,9 @@ public class ParticipantController {
     public ResponseEntity<?> getAllParticipantsByUserId(@RequestParam long userId) {
         return participantService.findAllEventsByUserId(userId);
     }
+
+    @GetMapping("/all/guests")
+    public ResponseEntity<?> getAllGuestsByEventId(@RequestParam long eventId) {
+        return participantService.getAllGuestsByEventId(eventId);
+    }
 }
