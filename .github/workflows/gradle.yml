@@ -62,7 +62,7 @@ jobs:
         cloud.aws.s3.bucket=${{ secrets.AWS_BUCKET_NAME }}
 
         # Spring Boot binding
-        server.address=127.0.0.1
+        server.address=0.0.0.0
 
         EOF
 
