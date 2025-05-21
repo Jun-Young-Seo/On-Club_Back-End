@@ -20,4 +20,8 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
     @Query("SELECT p.event FROM ParticipantEntity p WHERE p.user.userId = :userId")
     List<ClubEventEntity> findAllEventIdsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT COUNT(p) > 0 FROM ParticipantEntity p WHERE p.user.userId = :userId AND p.event.eventId = :eventId")
+    boolean existsByUserIdAndEventId(@Param("userId") long userId, @Param("eventId") long eventId);
+
 }

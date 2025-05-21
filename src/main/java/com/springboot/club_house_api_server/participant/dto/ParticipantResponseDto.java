@@ -15,7 +15,7 @@ public class ParticipantResponseDto {
     private long userId;
     private String userName;
     private UserEntity.Gender gender;
-    private LocalDateTime lastGamedAt;
+//    private LocalDateTime lastGamedAt;
     private int career;
     private int gameCount;
 }
