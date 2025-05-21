@@ -9,6 +9,7 @@ import com.springboot.club_house_api_server.guest.repository.GuestRepository;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.participant.dto.FindAllEventsDto;
+import com.springboot.club_house_api_server.participant.dto.ParticipantGuestDto;
 import com.springboot.club_house_api_server.participant.dto.ParticipantResponseDto;
 import com.springboot.club_house_api_server.participant.entity.ParticipantEntity;
 import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
@@ -189,16 +190,18 @@ public class ParticipantService {
 
     public ResponseEntity<?> getAllGuestsByEventId(long eventId) {
         List<Long> guestUserIds= guestRepository.findAllGuestUserIdByEventId(eventId);
-        List<ParticipantResponseDto> response = new ArrayList<>();
+        List<ParticipantGuestDto> response = new ArrayList<>();
         for(Long userId : guestUserIds){
             UserEntity user = userRepository.findById(userId).get();
-            ParticipantResponseDto dto = ParticipantResponseDto.builder()
+            ParticipantGuestDto dto= ParticipantGuestDto.builder()
                     .userId(user.getUserId())
                     .userName(user.getUserName())
                     .gender(user.getGender())
                     .lastGamedAt(LocalDateTime.now())
                     .career(user.getCareer())
                     .gameCount(gameParticipantRepository.countGamesByEventIdAndUserId(eventId,userId))
+                    .birthDate(user.getBirthDate())
+                    .region(user.getRegion())
                     .build();
             response.add(dto);
         }
