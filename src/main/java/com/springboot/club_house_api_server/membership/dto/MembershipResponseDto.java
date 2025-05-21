@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MembershipResponseDto {
+    private Long userId;
     private Long membershipId;
     private int attendanceCount;
     private int eventCount;
