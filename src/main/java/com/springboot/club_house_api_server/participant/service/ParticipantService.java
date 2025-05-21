@@ -17,7 +17,6 @@ import com.springboot.club_house_api_server.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -78,7 +77,7 @@ public class ParticipantService {
 
     public ResponseEntity<?> getAllParticipantsByEventId(long eventId) {
         List<ParticipantEntity> participantEntityList = participantRepository.findByEventId(eventId);
-        List<Long> guestList = guestRepository.findAllGuestEventsByEventId(eventId);
+        List<Long> guestList = guestRepository.findAllGuestUserIdByEventId(eventId);
         List<ParticipantResponseDto> response = new ArrayList<>();
         for(ParticipantEntity participantEntity : participantEntityList) {
             UserEntity user = participantEntity.getUser();
@@ -109,6 +108,7 @@ public class ParticipantService {
 
     public ResponseEntity<?> updateParticipants(long eventId){
         List<ParticipantEntity> participantEntityList = participantRepository.findByEventId(eventId);
+        List<Long> guestList = guestRepository.findAllGuestUserIdByEventId(eventId);
         List<ParticipantResponseDto> response = new ArrayList<>();
         for(ParticipantEntity participantEntity : participantEntityList) {
             UserEntity user = participantEntity.getUser();
@@ -128,6 +128,27 @@ public class ParticipantService {
                     .build();
             response.add(dto);
         }
+
+        for(Long guestId : guestList) {
+            UserEntity user = userRepository.findById(guestId).get();
+            GameParticipantEntity gpe = gameParticipantRepository.findMostRecentGameParticipant(user.getUserId(),eventId);
+            int gameCount = gameParticipantRepository.countGamesByEventIdAndUserId(eventId,user.getUserId());
+            LocalDateTime lastGame = null;
+                if (gpe != null) {
+                    lastGame = gpe.getLastGamedAt();
+                }
+                ParticipantResponseDto dto = ParticipantResponseDto.builder()
+                        .userId(user.getUserId())
+                        .lastGamedAt(lastGame)
+                        .userName(user.getUserName())
+                        .gender(user.getGender())
+                        .career(user.getCareer())
+                        .gameCount(gameCount)
+                        .build();
+                response.add(dto);
+        }
+
+
         return ResponseEntity.ok(response);
 
     }
@@ -162,6 +183,24 @@ public class ParticipantService {
             fDto.setClubName(c.getClub().getClubName());
             fDto.setUserId(userId);
             response.add(fDto);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<?> getAllGuestsByEventId(long eventId) {
+        List<Long> guestUserIds= guestRepository.findAllGuestUserIdByEventId(eventId);
+        List<ParticipantResponseDto> response = new ArrayList<>();
+        for(Long userId : guestUserIds){
+            UserEntity user = userRepository.findById(userId).get();
+            ParticipantResponseDto dto = ParticipantResponseDto.builder()
+                    .userId(user.getUserId())
+                    .userName(user.getUserName())
+                    .gender(user.getGender())
+                    .lastGamedAt(LocalDateTime.now())
+                    .career(user.getCareer())
+                    .gameCount(gameParticipantRepository.countGamesByEventIdAndUserId(eventId,userId))
+                    .build();
+            response.add(dto);
         }
         return ResponseEntity.ok(response);
     }
