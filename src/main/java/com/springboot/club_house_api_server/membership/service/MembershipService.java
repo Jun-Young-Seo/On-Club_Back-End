@@ -175,6 +175,7 @@ public class MembershipService {
             }
             UserEntity user = userOpt.get();
             MembershipResponseDto dto = MembershipResponseDto.builder()
+                    .userId(membership.getUser().getUserId())
                     .membershipId(membership.getMembershipId())
                     .attendanceCount(membership.getAttendanceCount())
                     .joinedAt(membership.getJoinedAt())
