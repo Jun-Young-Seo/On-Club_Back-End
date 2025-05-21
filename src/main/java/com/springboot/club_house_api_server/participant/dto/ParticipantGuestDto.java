@@ -15,10 +15,10 @@ public class ParticipantGuestDto {
     private long userId;
     private String userName;
     private UserEntity.Gender gender;
-    private LocalDateTime lastGamedAt;
+//    private LocalDateTime lastGamedAt;
     private int career;
     private int gameCount;
     private LocalDate birthDate;
     private String region;
-
+    private String userTel;
 }

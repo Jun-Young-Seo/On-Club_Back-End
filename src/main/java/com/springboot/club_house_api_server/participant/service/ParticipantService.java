@@ -5,6 +5,7 @@ import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
 import com.springboot.club_house_api_server.game.entity.GameParticipantEntity;
 import com.springboot.club_house_api_server.game.repository.GameParticipantRepository;
+import com.springboot.club_house_api_server.guest.entity.GuestEntity;
 import com.springboot.club_house_api_server.guest.repository.GuestRepository;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
@@ -40,6 +41,7 @@ public class ParticipantService {
 
     @Transactional
     public ResponseEntity<?> joinToEvent(long userId, long eventId) {
+        boolean isMember = false;
         Optional<ClubEventEntity> eventOpt = clubEventRepository.findById(eventId);
         if (eventOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("eventId에 해당하는 이벤트가 없습니다.");
@@ -50,6 +52,9 @@ public class ParticipantService {
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId에 해당하는 유저가 없습니다.");
         }
+        if (participantRepository.existsByUserIdAndEventId(userId, eventId)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 이벤트에 참가한 유저입니다.");
+        }
 
         UserEntity user = userOpt.get();
 
@@ -57,22 +62,34 @@ public class ParticipantService {
 
         Optional<MembershipEntity>membershipOpt = membershipRepository.getMembershipEntityByUserIdAndClubId(userId,clubId);
 
-        if(membershipOpt.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("MembershipId에 해당하는 membership이 없습니다.");
+        if(membershipOpt.isPresent()){
+            isMember=true;
         }
-        MembershipEntity membership = membershipOpt.get();
+        if(isMember) {
+            MembershipEntity membership = membershipOpt.get();
 
-        membership.setAttendanceCount(membership.getAttendanceCount()+1);
-        membershipRepository.save(membership);
+            membership.setAttendanceCount(membership.getAttendanceCount() + 1);
+            membershipRepository.save(membership);
 
-        ParticipantEntity p = ParticipantEntity.builder()
-                .user(user)
-                .event(event)
-                .club(event.getClub())
-                .build();
-
-        participantRepository.save(p);
-
+            ParticipantEntity p = ParticipantEntity.builder()
+                    .user(user)
+                    .event(event)
+                    .club(event.getClub())
+                    .build();
+            participantRepository.save(p);
+        }
+        else{ //Guest
+            Optional<GuestEntity> guestOpt =  guestRepository.findByUserAndEvent(user, event);
+            if(guestOpt.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("UserID에 해당하는 게스트 정보가 없습니다.");
+            }
+            ParticipantEntity p = ParticipantEntity.builder()
+                    .user(user)
+                    .event(event)
+                    .club(event.getClub())
+                    .build();
+            participantRepository.save(p);
+        }
         return ResponseEntity.ok("");
     }
 
@@ -84,7 +101,7 @@ public class ParticipantService {
             UserEntity user = participantEntity.getUser();
             ParticipantResponseDto dto = ParticipantResponseDto.builder()
                     .userId(user.getUserId())
-                    .lastGamedAt(LocalDateTime.now())
+//                    .lastGamedAt(LocalDateTime.now())
                     .userName(user.getUserName())
                     .gender(user.getGender())
                     .career(user.getCareer())
@@ -96,7 +113,7 @@ public class ParticipantService {
                 UserEntity user = userRepository.findById(guestId).get();
                 ParticipantResponseDto dto = ParticipantResponseDto.builder()
                         .userId(user.getUserId())
-                        .lastGamedAt(LocalDateTime.now())
+//                        .lastGamedAt(LocalDateTime.now())
                         .userName(user.getUserName())
                         .gender(user.getGender())
                         .career(user.getCareer())
@@ -121,7 +138,7 @@ public class ParticipantService {
             }
             ParticipantResponseDto dto = ParticipantResponseDto.builder()
                     .userId(user.getUserId())
-                    .lastGamedAt(lastGame)
+//                    .lastGamedAt(lastGame)
                     .userName(user.getUserName())
                     .gender(user.getGender())
                     .career(user.getCareer())
@@ -140,7 +157,7 @@ public class ParticipantService {
                 }
                 ParticipantResponseDto dto = ParticipantResponseDto.builder()
                         .userId(user.getUserId())
-                        .lastGamedAt(lastGame)
+//                        .lastGamedAt(lastGame)
                         .userName(user.getUserName())
                         .gender(user.getGender())
                         .career(user.getCareer())
@@ -197,11 +214,12 @@ public class ParticipantService {
                     .userId(user.getUserId())
                     .userName(user.getUserName())
                     .gender(user.getGender())
-                    .lastGamedAt(LocalDateTime.now())
+//                    .lastGamedAt(LocalDateTime.now())
                     .career(user.getCareer())
                     .gameCount(gameParticipantRepository.countGamesByEventIdAndUserId(eventId,userId))
                     .birthDate(user.getBirthDate())
                     .region(user.getRegion())
+                    .userTel(user.getUserTel())
                     .build();
             response.add(dto);
         }
