@@ -51,7 +51,6 @@ public class TransactionEntity {
     private String transactionCategory;
 
     //여기 부분이 받는 분 통장에 표시할 내용에 해당
-    //이걸 전화번호로 받아서 파싱해서 참석 처리?
     @Column(name="transaction_description", nullable = false)
     private String transactionDescription;
 

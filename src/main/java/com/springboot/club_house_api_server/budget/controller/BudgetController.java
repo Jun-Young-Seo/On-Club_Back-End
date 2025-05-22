@@ -64,7 +64,8 @@ public class BudgetController {
 
     @GetMapping("/chart-monthly")
     public ResponseEntity<?> findMonthlyDataSummary(@RequestParam long clubId){
-        System.out.println("Chart-MOnthly");
         return transactionService.findMonthlyDataSummary(clubId);
     }
+
+
 }

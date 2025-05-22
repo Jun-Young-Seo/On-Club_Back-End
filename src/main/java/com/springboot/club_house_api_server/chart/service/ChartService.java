@@ -38,7 +38,7 @@ public class ChartService {
         PieChart pieChart = new PieChartBuilder()
                 .width(500)
                 .height(500)
-                .title("test pie Chart")
+                .title("aiBudgetAnalyze pie Chart")
                 .build();
         List<UserEntity> clubUsers = clubRepository.findAllClubMembers(clubId);
 //        int i=0;

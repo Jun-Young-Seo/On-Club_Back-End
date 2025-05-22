@@ -1,5 +1,6 @@
 package com.springboot.club_house_api_server.budget.repository;
 
+import com.springboot.club_house_api_server.budget.dto.CategorySummaryDto;
 import com.springboot.club_house_api_server.budget.dto.ExpenseSummaryDto;
 import com.springboot.club_house_api_server.budget.dto.IncomeSummaryDto;
 import com.springboot.club_house_api_server.budget.entity.TransactionEntity;
@@ -168,4 +169,54 @@ public interface TransactionRepository extends JpaRepository<TransactionEntity, 
     List<ExpenseSummaryDto> findExpenseSummary(@Param("accountId") long accountId,
                                 @Param("startDate") LocalDateTime startDate,
                                 @Param("endDate") LocalDateTime endDate);
+
+
+    //=====================For Report =================
+    //수입 총합
+    @Query("SELECT SUM(t.transactionAmount) " +
+            "FROM TransactionEntity t " +
+            "WHERE TRIM(t.transactionType) = '입금' " +
+            "AND t.club.clubId = :clubId " +
+            "AND t.transactionDate BETWEEN :startDate AND :endDate")
+    Long findTotalIncome(@Param("clubId") long clubId,
+                         @Param("startDate") LocalDateTime startDate,
+                         @Param("endDate") LocalDateTime endDate);
+    //지출 총합
+    @Query("SELECT SUM(t.transactionAmount) " +
+            "FROM TransactionEntity t " +
+            "WHERE TRIM(t.transactionType) = '출금' " +
+            "AND t.club.clubId = :clubId " +
+            "AND t.transactionDate BETWEEN :startDate AND :endDate")
+    Long findTotalExpense(@Param("clubId") long clubId,
+                          @Param("startDate") LocalDateTime startDate,
+                          @Param("endDate") LocalDateTime endDate);
+
+
+    //카테고리별 (transactionDetail) 총계
+    //?인 경우는 제외
+    @Query("SELECT new com.springboot.club_house_api_server.budget.dto.CategorySummaryDto(" +
+            "t.transactionDetail, SUM(t.transactionAmount)) " +
+            "FROM TransactionEntity t " +
+            "WHERE t.club.clubId = :clubId " +
+            "AND t.transactionDate BETWEEN :startDate AND :endDate " +
+            "AND t.transactionDetail <> '?' " +
+            "GROUP BY t.transactionDetail")
+    List<CategorySummaryDto> findTotalAmountGroupedByCategory(
+            @Param("clubId") Long clubId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
+
+    //회비만 모은 총계
+    @Query("SELECT SUM(t.transactionAmount) " +
+            "FROM TransactionEntity t " +
+            "WHERE t.club.clubId = :clubId " +
+            "AND t.transactionDate BETWEEN :startDate AND :endDate " +
+            "AND t.transactionDetail = '회비'")
+    Long totalAmountSubscription(
+            @Param("clubId") Long clubId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+
 }
