@@ -46,7 +46,7 @@ public class BudgetReportService {
 
         List<CategorySummaryDto> categorizedTransactions = transactionRepository.findTotalAmountGroupedByCategory(clubId, startDate, endDate);
 
-        int memberCount = Math.toIntExact(membershipRepository.countAllMemberships());
+        int memberCount = Math.toIntExact(membershipRepository.countAllMemberships(clubId));
         int feePerMember = (int) (subscriptionFee/memberCount);
         System.out.println(feePerMember);
         // 4. Report DTO 생성
