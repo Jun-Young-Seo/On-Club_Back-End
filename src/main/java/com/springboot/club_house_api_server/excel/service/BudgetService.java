@@ -46,7 +46,7 @@ public class BudgetService {
         int firstRowNum = 12; //카카오뱅크 내보내기 엑셀 파일은 12행부터 데이터가 시작됨
         List<TransactionEntity> transactionEntityList = new ArrayList<>(); //save All 호출용 리스트
 
-        Optional<ClubAccountEntity> clubAccountOpt = clubAccountRepository.findById(requestDto.getClubId());
+        Optional<ClubAccountEntity> clubAccountOpt = clubAccountRepository.findById(requestDto.getAccountId());
         Optional<ClubEntity> clubOpt = clubRepository.findById(requestDto.getClubId());
         Optional<UserEntity> userOpt = userRepository.findById(requestDto.getUserId());
 
