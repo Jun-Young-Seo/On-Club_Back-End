@@ -29,4 +29,7 @@ public interface MembershipRepository extends JpaRepository<MembershipEntity,Lon
 
     @Query("SELECT m.user.userId FROM MembershipEntity  m WHERE m.club.clubId = :clubId")
     List<Long> findUserIdsOfAllRolesByClubId(@Param("clubId") Long clubId);
+
+    @Query("SELECT COUNT(m) FROM MembershipEntity m")
+    Long countAllMemberships();
 }
