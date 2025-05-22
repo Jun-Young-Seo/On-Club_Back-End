@@ -6,11 +6,13 @@ import com.springboot.club_house_api_server.openai.analyze.dto.CustomRequestDto;
 import com.springboot.club_house_api_server.openai.analyze.dto.MessageDto;
 import com.springboot.club_house_api_server.openai.analyze.dto.ResponseDto;
 import com.springboot.club_house_api_server.report.dto.BudgetReportDto;
+import com.springboot.club_house_api_server.report.dto.MemberChartDataDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Member;
 import java.util.List;
 
 @Service
@@ -62,6 +64,14 @@ public class OpenAIService {
         return ResponseEntity.ok(result);
 
     }
+
+    public ResponseEntity<?> writeMemberReportWithAI(MemberChartDataDto dto){
+        String prompt = buildMemberAnalysisPrompt(dto);
+        String result = getGptResponse(prompt);
+
+        return ResponseEntity.ok(result);
+    }
+
     private String buildClubDescriptionPrompt(String clubName, String region, String careerRange, String purpose) {
         return String.format("""
         아래 정보를 바탕으로 테니스 클럽의 소개 문장을 작성해줘.
@@ -105,7 +115,7 @@ public class OpenAIService {
         }
 
         return String.format("""
-        아래는 %s 클럽의 %s 예산 데이터야.
+        아래는 테니스 클럽의 %s 예산 데이터야.
         지출은 수 앞에 -가 포함되어 있어.
         
         ✅ 특징:
@@ -151,7 +161,6 @@ public class OpenAIService {
 
         👉 출력:
         """,
-                "오목회 테니스클럽", // 또는 dto에 clubName 필드 추가 시: dto.getClubName()
                 dto.getMonth(),
                 dto.getTotalIncome(),
                 dto.getTotalExpense(),
@@ -161,6 +170,66 @@ public class OpenAIService {
                 categorySection.toString()
         );
     }
+
+    private String buildMemberAnalysisPrompt(MemberChartDataDto dto) {
+        return String.format("""
+    아래는 테니스 클럽의 회원 통계 데이터야.
+
+    ✅ 특징:
+    이 데이터는 테니스 클럽의 **회원 활동 및 구성 분석**을 통해, 운영진이 다음 달 회원 관리 전략을 수립하는 데 도움을 주기 위한 자료야.
+    게스트는 클럽에 소속된 회원은 아니지만, 따로 찾아서 참가를 신청했다는 점에서 그 의의가 있어.
+    게스트들을 클럽의 회원이 되도록 유도하는 것이 좋은 전략이 될거야.
+    또, 회원이 많다고 해서 무조건 좋은 클럽은 아니야.
+    좋은 클럽이란 "활동하는 회원이 많은 클럽"이야. 이 말은 소속된 회원 중 대부분이 활동에 참여한다는 것을 의미해.
+  
+
+    ✅ 분석 요청:
+    - 현재 정회원 수와 지난 한 달간 신규 가입자 수를 비교해 회원 성장 추세를 파악해줘.
+    - 남성/여성 회원 비율을 분석해서 성비 균형에 대한 인사이트를 제공해줘. 성비가 비슷하게 맞아야 다른 사람들이 봤을 때 참여하기 좋은 클럽일 수 있어.
+    - 하지만 남성 또는 여성으로만 구성되어 있다면 남성 또는 여성 전용 클럽일 수 있으니 언급하지 않아도 돼.
+    - 게스트 수(누적 및 최근 1개월)를 분석하고, 이를 통해 **외부 유입 전략에 대한 의견**을 줘. (예 : SNS 홍보 강화, 친구를 게스트로 데려오면 상품 증정 등)
+    - 이벤트와 게임에서 활동량이 많은 회원들에 대해서도 언급해줘. 이 회원들에 대한 적절한 포상이 회원 활동 유도에 도움이 될 수 있어. 언급은 회원의 이름만을 언급하자.(userName)
+    - 마지막엔 운영에 대한 제안 한두 줄을 넣어줘. 이 제안을 보고 운영진이 운영에 대한 인사이트를 얻을 수 있어야 해.
+
+    ✅ 구조:
+    - 보고서는 아래의 **마크다운 기반** 구조로 구성되면 좋아:
+    - `## 📊 회원 통계 요약` → 회원 수, 증가 추세 등
+    - `## 👥 성비 및 구성 분석` → 남녀 비율 및 인사이트
+    - `## 🚪 게스트 유입 분석` → 게스트 방문 및 유입 제안
+    - `## 🏅 핵심 활동 회원` → 활동 많은 회원 소개
+    - `## 📌 다음 달 운영 방향` → 추천 전략 및 행동 제안
+
+    - 꼭 위 구조를 따를 필요는 없고, 직접 상황에 맞춰 스스로 더 적절하게 나눠도 좋아.
+    - 글은 반드시 마크다운 문법을 따라야 하고, **적절한 이모지와 제목**, 그리고 `-` 리스트 형태로 표현해줘.
+    - 마지막에 불필요한 인사말이나 마무리 멘트는 절대 포함하면 안돼.
+
+    ✨ 입력 데이터
+    - 총 정회원 수: %d명
+    - 1개월간 신규 가입자 수: %d명
+    - 누적 게스트 수: %d명
+    - 1개월간 게스트 수: %d명
+    - 1개월간 이벤트 수: %d개
+    - 전체 이벤트 총 참석 횟수: %d회
+    - 남성 회원: %d명
+    - 여성 회원: %d명
+    - 이벤트 최다 참석자: %s (%s)
+    - 게임 최다 참가자: %s (%s)
+
+    👉 출력:
+    """,
+                dto.getHowManyMembers(),
+                dto.getHowManyMembersBetweenOneMonth(),
+                dto.getHowManyAccumulatedGuests(),
+                dto.getHowManyGuestsBetweenOneMonth(),
+                dto.getHowManyEventsBetweenOneMonth(),
+                dto.getAttendanceCount(),
+                dto.getMaleMembers(),
+                dto.getFemaleMembers(),
+                dto.getMostAttendantMember().getUserName(), dto.getMostAttendantMember().getUserTel(),
+                dto.getMostManyGamesMember().getUserName(), dto.getMostManyGamesMember().getUserTel()
+        );
+    }
+
 }
 
 

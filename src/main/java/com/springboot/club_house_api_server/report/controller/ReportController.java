@@ -57,4 +57,17 @@ public class ReportController {
         LocalDate targetMonth = LocalDate.of(year, month, 1);
         return memberReportService.getMemberReportChartData(clubId, targetMonth);
     }
+
+    @GetMapping("/member/analyze")
+    public ResponseEntity<?> aiMemberAnalyze(@RequestParam Long clubId, @RequestParam int month){
+        int year = LocalDate.now().getYear();
+        if (month == 1) {
+            year -= 1;
+            month = 12;
+        } else {
+            month -= 1;
+        }
+        LocalDate targetMonth = LocalDate.of(year, month, 1);
+        return memberReportService.getAIMemberReport(clubId, targetMonth);
+    }
 }
