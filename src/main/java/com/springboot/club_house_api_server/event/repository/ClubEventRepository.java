@@ -64,4 +64,19 @@ public interface ClubEventRepository extends JpaRepository<ClubEventEntity,Long>
     List<ClubEventEntity> findEventsByUserIdWithinDateRange(@Param("userId") Long userId,
                                                   @Param("startDate") LocalDateTime startDate,
                                                   @Param("endDate") LocalDateTime endDate);
+
+//보고서 데이터용
+    //몇명이 한달간 가입했는지에 사용
+    @Query("""
+    SELECT COUNT(e)
+    FROM ClubEventEntity e
+    WHERE e.club.clubId = :clubId
+      AND e.eventStartTime BETWEEN :startDate AND :endDate
+""")
+    Long countEventsBetween(
+            @Param("clubId") Long clubId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
 }

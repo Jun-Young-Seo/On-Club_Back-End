@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +21,17 @@ public interface GuestRepository extends JpaRepository<GuestEntity, Long> {
 
     @Query("SELECT g.user.userId FROM GuestEntity g where g.event.eventId = :eventId")
     List<Long> findAllGuestUserIdByEventId(@Param("eventId") Long eventId);
+
+
+    //이달에 참석한 게스트 ID 가져오기
+    //보고서 작성용
+    @Query("""
+    SELECT DISTINCT g.user
+    FROM GuestEntity g
+    WHERE g.event.eventStartTime BETWEEN :startDate AND :endDate
+    """)
+    List<UserEntity> findAttendedGuestUserIds(@Param("startDate") LocalDateTime start,
+                                        @Param("endDate") LocalDateTime end);
+
+
 }
