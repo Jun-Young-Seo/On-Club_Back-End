@@ -39,7 +39,7 @@ public class BudgetReportService {
 
         LocalDateTime startDate = targetMonth.withDayOfMonth(1).atStartOfDay();
         LocalDateTime endDate = targetMonth.withDayOfMonth(targetMonth.lengthOfMonth()).atTime(23, 59, 59);
-        System.out.println("Input : "+clubId);
+
         Long income = Optional.ofNullable(transactionRepository.findTotalIncome(clubId, startDate, endDate)).orElse(0L);
         Long expense = Optional.ofNullable(transactionRepository.findTotalExpense(clubId, startDate, endDate)).orElse(0L);
         Long subscriptionFee = Optional.ofNullable(transactionRepository.totalAmountSubscription(clubId, startDate, endDate)).orElse(0L);
@@ -52,7 +52,7 @@ public class BudgetReportService {
         if(memberCount != 0) {
             feePerMember = (int) (subscriptionFee / memberCount);
         }
-        System.out.println(feePerMember);
+
         BudgetReportDto reportDto = BudgetReportDto.builder()
                 .month(targetMonth.toString())
                 .totalIncome(income)
@@ -89,4 +89,6 @@ public class BudgetReportService {
 
         return ResponseEntity.ok(chartDataDto);
     }
+
+
 }

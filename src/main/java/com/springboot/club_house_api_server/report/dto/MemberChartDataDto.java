@@ -21,4 +21,19 @@ public class MemberChartDataDto {
 //    private UserEntity mostWinnerMember;
     private UserInfoDto mostManyGamesMember;
 
+    @Override
+    public String toString() {
+        return "MemberChartDataDto{" +
+                "howManyMembers=" + howManyMembers +
+                ", howManyMembersBetweenOneMonth=" + howManyMembersBetweenOneMonth +
+                ", howManyAccumulatedGuests=" + howManyAccumulatedGuests +
+                ", howManyGuestsBetweenOneMonth=" + howManyGuestsBetweenOneMonth +
+                ", howManyEventsBetweenOneMonth=" + howManyEventsBetweenOneMonth +
+                ", attendanceCount=" + attendanceCount +
+                ", maleMembers=" + maleMembers +
+                ", femaleMembers=" + femaleMembers +
+                ", mostAttendantMember=" + (mostAttendantMember != null ? mostAttendantMember.getUserName() : "most attendant user null") +
+                ", mostManyGamesMember=" + (mostManyGamesMember != null ? mostManyGamesMember.getUserName() : "most many game user null") +
+                '}';
+    }
 }

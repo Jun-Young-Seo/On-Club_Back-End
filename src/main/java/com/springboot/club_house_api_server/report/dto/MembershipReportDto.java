@@ -9,5 +9,4 @@ public class MembershipReportDto {
     private String month;
     private int memberCount;
     private int attendanceCount;
-
 }
