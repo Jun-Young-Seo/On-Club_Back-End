@@ -69,4 +69,9 @@ public class UserEntity {
         MALE, FEMALE
     }
 
+    @Override
+    public String toString() {
+        return "["+userId+" : "+userName+"]";
+    }
+
 }

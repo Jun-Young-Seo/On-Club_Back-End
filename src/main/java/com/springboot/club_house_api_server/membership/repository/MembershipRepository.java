@@ -1,11 +1,13 @@
 package com.springboot.club_house_api_server.membership.repository;
 
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
+import com.springboot.club_house_api_server.user.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,4 +34,28 @@ public interface MembershipRepository extends JpaRepository<MembershipEntity,Lon
 
     @Query("SELECT COUNT(m) FROM MembershipEntity m WHERE m.club.clubId = :clubId")
     Long countAllMemberships(@Param("clubId")Long clubId);
+
+    @Query("""
+    SELECT COUNT(m)
+    FROM MembershipEntity m
+    WHERE m.club.clubId = :clubId
+      AND m.joinedAt BETWEEN :startDate AND :endDate
+    """)
+        Long countMembershipsJoinedBetween(
+                @Param("clubId") Long clubId,
+                @Param("startDate") LocalDateTime startDate,
+                @Param("endDate") LocalDateTime endDate
+        );
+
+    @Query("""
+    SELECT COUNT(m)
+    FROM MembershipEntity m
+    WHERE m.club.clubId = :clubId and
+        m.user.gender = :gender
+    """)
+        Integer countMembershipsWithGender(
+            @Param("clubId") Long clubId,
+            @Param("gender") UserEntity.Gender gender
+        );
+
 }
