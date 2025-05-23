@@ -42,7 +42,7 @@ public class ReportController {
             month -= 1;
         }
         Optional<ReportEntity> reportOpt = reportRepository.findByClubAndYearAndMonth(club, year, month);
-        if(reportOpt.isPresent()){
+        if(reportOpt.isPresent() && reportOpt.get().getAiBudgetReport() != null){
             return ResponseEntity.ok(reportOpt.get().getAiBudgetReport());
         }
 
@@ -88,7 +88,7 @@ public class ReportController {
             month -= 1;
         }
         Optional<ReportEntity> reportOpt = reportRepository.findByClubAndYearAndMonth(club, year, month);
-        if(reportOpt.isPresent()){
+        if(reportOpt.isPresent() && reportOpt.get().getAiMemberReport()!=null){
             return ResponseEntity.ok(reportOpt.get().getAiMemberReport());
         }
         return memberReportService.getAIMemberReport(clubId, year, month);
