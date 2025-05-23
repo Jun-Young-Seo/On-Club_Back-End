@@ -36,7 +36,7 @@ public class MemberReportService {
     private final OpenAIService openAIService;
 
 
-    public ResponseEntity<?> getMemberReportChartData(Long clubId, LocalDate targetMonth) {
+    public ResponseEntity<?> getMemberReportChartData(Long clubId, int year, int month) {
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if (clubOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -44,8 +44,13 @@ public class MemberReportService {
         }
         ClubEntity club = clubOpt.get();
 
-        LocalDateTime startDate = targetMonth.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endDate = targetMonth.withDayOfMonth(targetMonth.lengthOfMonth()).atTime(23, 59, 59);
+
+
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+
+        LocalDateTime startDate = firstDay.atStartOfDay();
+        LocalDateTime endDate = lastDay.atTime(23, 59, 59);
         List<UserEntity> guestUserIds = guestRepository.findAttendedGuestUserIds(startDate, endDate);
         List<MembersReportDto> attendanceCounts = participantRepository.findMembershipAttendanceCount(startDate, endDate);
         UserEntity topAttendant = participantRepository.findTopEventParticipant(PageRequest.of(0, 1)).get(0);
@@ -85,15 +90,20 @@ public class MemberReportService {
         return ResponseEntity.ok(chartDataDto);
     }
 
-    public ResponseEntity<?> getAIMemberReport(Long clubId, LocalDate targetMonth) {
+    public ResponseEntity<?> getAIMemberReport(Long clubId, int year, int month) {
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if (clubOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("clubId에 해당하는 club이 없습니다.");
         }
         ClubEntity club = clubOpt.get();
-        LocalDateTime startDate = targetMonth.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endDate = targetMonth.withDayOfMonth(targetMonth.lengthOfMonth()).atTime(23, 59, 59);
+
+
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+
+        LocalDateTime startDate = firstDay.atStartOfDay();
+        LocalDateTime endDate = lastDay.atTime(23, 59, 59);
 
         List<UserEntity> guestUserIds = guestRepository.findAttendedGuestUserIds(startDate, endDate);
         List<MembersReportDto> attendanceCounts = participantRepository.findMembershipAttendanceCount(startDate, endDate);
@@ -118,6 +128,8 @@ public class MemberReportService {
                 .build();
 
         MemberChartDataDto chartDataDto = MemberChartDataDto.builder()
+                .year(year)
+                .month(month)
                 .howManyMembers(club.getClubHowManyMembers())
                 .howManyMembersBetweenOneMonth(membershipRepository.countMembershipsJoinedBetween(clubId,startDate,endDate))
                 .howManyAccumulatedGuests(club.getClubAccumulatedGuests())
@@ -130,6 +142,6 @@ public class MemberReportService {
                 .mostManyGamesMember(topGamerUserInfo)
                 .build();
 
-        return openAIService.writeMemberReportWithAI(chartDataDto);
+        return openAIService.writeMemberReportWithAI(clubId, chartDataDto);
     }
 }

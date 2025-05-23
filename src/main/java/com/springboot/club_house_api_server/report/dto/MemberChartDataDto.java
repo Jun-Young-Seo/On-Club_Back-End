@@ -8,6 +8,9 @@ import lombok.Data;
 @Data
 @Builder
 public class MemberChartDataDto {
+    private int year;
+    private int month;
+
     private Integer howManyMembers;
     private Long howManyMembersBetweenOneMonth;
     private Integer howManyAccumulatedGuests;
