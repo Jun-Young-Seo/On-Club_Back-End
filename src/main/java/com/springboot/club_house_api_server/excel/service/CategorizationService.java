@@ -73,11 +73,14 @@ public class CategorizationService {
 
     private String buildPrompt(List<String> descriptions) {
         StringBuilder sb = new StringBuilder();
-        sb.append("다음 문장은 거래 내역이야.\n");
+        sb.append("다음 문장은 거래 내역이야. 거래 내역은 테니스 클럽의 통장 사용 내역이야.\n");
+        sb.append("주로 모든 클럽에 있는 거래 내역은 다음과 같아.\n");
+        sb.append("코트비, 코트비 환불, 회비, 회비 환불, 교통비, 용품비, 회식비, 이자");
         sb.append("사람 이름(2~4 글자)이라고 판단되면 회비로 처리해\n");
-        sb.append("교통 수단의 이름이면 교통비, 식당의 이름이라면 식비로 처리하자.\n");
+        sb.append("교통 수단의 이름이면 교통비, 식당의 이름이라면 회식비로 처리하자.\n");
         sb.append("또, 이자는 이자로 처리해줘.\n");
-        sb.append("판단하기에 애매하다고 생각되면 ? 필드로 저장해. 무리해서 억지로 추론하지 말고 애매하면 ?로 해.\n\n");
+        sb.append("각 내용을 보고, 위의 분류에 가장 알맞은 것을 선택해줘\n");
+        sb.append("하지만 판단하기에 애매하다면 ? 필드로 저장해. 무리해서 억지로 추론하지 말고 애매하면 ?로 해. 빈 칸으로 비우면 안돼 반드시 ?를 설정해\n\n");
         sb.append("각 항목은 순수한 JSON 형식으로 반환하고 \"다음은 ~~~입니다.\"와 같이 부연 설명은 붙이지 마.\n");
         sb.append("또한 추가적인 설명이나 마크다운 표기는 절대 포함되면 안돼.\n");
         sb.append("응답 예시는 다음과 같아:\n");
