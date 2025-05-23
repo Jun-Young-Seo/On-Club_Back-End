@@ -9,7 +9,8 @@ import java.util.List;
 @Builder
 @Data
 public class BudgetReportDto {
-    private String month;
+    private int year;
+    private int month;
     private Long totalIncome;
     private Long totalExpense;
     private Long netProfit;

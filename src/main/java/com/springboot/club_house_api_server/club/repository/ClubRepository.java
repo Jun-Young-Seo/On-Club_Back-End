@@ -11,13 +11,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface ClubRepository extends JpaRepository<ClubEntity, Long> {
 
     //랜덤ㅋ ㅡㄹ럽찾기
     @Query("SELECT c FROM ClubEntity c ORDER BY FUNCTION('RAND')")
     List<ClubEntity> findRandomClubs();
-
+    Optional<ClubEntity> findById(Long id);
     // 1. 클럽 이름으로 클럽 조회
     @Query("SELECT c FROM ClubEntity c WHERE c.clubName = :name")
     Optional<ClubEntity> findByClubName(@Param("name") String name);

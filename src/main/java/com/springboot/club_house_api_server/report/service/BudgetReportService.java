@@ -30,15 +30,18 @@ public class BudgetReportService {
     private final OpenAIService openAIService;
     private final MembershipRepository membershipRepository;
 
-    public ResponseEntity<?> getAIBudgetReport(Long clubId, LocalDate targetMonth) {
+    public ResponseEntity<?> getAIBudgetReport(Long clubId, int year, int month) {
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if (clubOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("clubId에 해당하는 club이 없습니다.");
         }
 
-        LocalDateTime startDate = targetMonth.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endDate = targetMonth.withDayOfMonth(targetMonth.lengthOfMonth()).atTime(23, 59, 59);
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+
+        LocalDateTime startDate = firstDay.atStartOfDay();
+        LocalDateTime endDate = lastDay.atTime(23, 59, 59);
 
         Long income = Optional.ofNullable(transactionRepository.findTotalIncome(clubId, startDate, endDate)).orElse(0L);
         Long expense = Optional.ofNullable(transactionRepository.findTotalExpense(clubId, startDate, endDate)).orElse(0L);
@@ -54,7 +57,8 @@ public class BudgetReportService {
         }
 
         BudgetReportDto reportDto = BudgetReportDto.builder()
-                .month(targetMonth.toString())
+                .year(year)
+                .month(month)
                 .totalIncome(income)
                 .totalExpense(expense)
                 .netProfit(income - expense)
@@ -65,18 +69,24 @@ public class BudgetReportService {
                 .build();
 
 
-        return openAIService.writeBudgetReportWithAI(reportDto);
+        return openAIService.writeBudgetReportWithAI(clubId, reportDto);
     }
 
-    public ResponseEntity<?> getBudgetReportChartData(Long clubId, LocalDate targetMonth) {
+    public ResponseEntity<?> getBudgetReportChartData(Long clubId, int year, int month) {
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if (clubOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("clubId에 해당하는 club이 없습니다.");
         }
 
-        LocalDateTime startDate = targetMonth.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime endDate = targetMonth.withDayOfMonth(targetMonth.lengthOfMonth()).atTime(23, 59, 59);
+
+
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+
+        LocalDateTime startDate = firstDay.atStartOfDay();
+        LocalDateTime endDate = lastDay.atTime(23, 59, 59);
+
         Long income = Optional.ofNullable(transactionRepository.findTotalIncome(clubId, startDate, endDate)).orElse(0L);
         Long expense = Optional.ofNullable(transactionRepository.findTotalExpense(clubId, startDate, endDate)).orElse(0L);
         List<CategorySummaryDto> categorizedTransactions = transactionRepository.findTotalAmountGroupedByCategory(clubId, startDate, endDate);

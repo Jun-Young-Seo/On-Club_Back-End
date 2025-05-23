@@ -1,32 +1,43 @@
 package com.springboot.club_house_api_server.openai.analyze.service;
 
 import com.springboot.club_house_api_server.budget.dto.CategorySummaryDto;
+import com.springboot.club_house_api_server.club.entity.ClubEntity;
+import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.openai.analyze.dto.ClubDescriptionDto;
 import com.springboot.club_house_api_server.openai.analyze.dto.CustomRequestDto;
 import com.springboot.club_house_api_server.openai.analyze.dto.MessageDto;
 import com.springboot.club_house_api_server.openai.analyze.dto.ResponseDto;
 import com.springboot.club_house_api_server.report.dto.BudgetReportDto;
 import com.springboot.club_house_api_server.report.dto.MemberChartDataDto;
+import com.springboot.club_house_api_server.report.entity.ReportEntity;
+import com.springboot.club_house_api_server.report.repository.ReportRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Member;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OpenAIService {
     private final RestTemplate restTemplate;
     private final String openAIURL;
     private final String gptModel;
+    private final ReportRepository reportRepository;
+    private final ClubRepository clubRepository;
 
     public OpenAIService(@Value("${openai.api.url}")String openAIURL,
                          @Value("${openai.model}")String gptModel,
-                         RestTemplate restTemplate) {
+                         RestTemplate restTemplate, ReportRepository reportRepository, ClubRepository clubRepository) {
         this.openAIURL = openAIURL;
         this.gptModel = gptModel;
         this.restTemplate = restTemplate;
+        this.reportRepository = reportRepository;
+        this.clubRepository = clubRepository;
     }
 
     public String getGptResponse(String prompt) {
@@ -56,18 +67,65 @@ public class OpenAIService {
         return ResponseEntity.ok(result);
     }
 
+    @Transactional
+    public ResponseEntity<?> writeBudgetReportWithAI(Long clubId, BudgetReportDto dto) {
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 club이 없습니다.");
+        }
+        ClubEntity club = clubOpt.get();
 
-    public ResponseEntity<?> writeBudgetReportWithAI(BudgetReportDto dto) {
+        Optional<ReportEntity> existingOpt = reportRepository.findByClubAndYearAndMonth(club, dto.getYear(), dto.getMonth());
+
         String prompt = buildBudgetAnalysisPrompt(dto);
         String result = getGptResponse(prompt);
+
+        //이미 엔티티가 존재하는 경우
+        //덮어 씌워지기 때문에 Set
+        if(existingOpt.isPresent()){
+            ReportEntity reportEntity = existingOpt.get();
+            reportEntity.setAiBudgetReport(result);
+            return ResponseEntity.ok(result);
+        }
+        //엔티티가 없었다면 새로 생성
+        ReportEntity reportEntity = ReportEntity.builder()
+                .year(dto.getYear())
+                .month(dto.getMonth())
+                .club(club)
+                .aiBudgetReport(result)
+                .build();
+
+        reportRepository.save(reportEntity);
 
         return ResponseEntity.ok(result);
 
     }
 
-    public ResponseEntity<?> writeMemberReportWithAI(MemberChartDataDto dto){
+    @Transactional
+    public ResponseEntity<?> writeMemberReportWithAI(Long clubId, MemberChartDataDto dto){
+        Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
+        if(clubOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("clubId에 해당하는 club이 없습니다.");
+        }
+        ClubEntity club = clubOpt.get();
+
         String prompt = buildMemberAnalysisPrompt(dto);
         String result = getGptResponse(prompt);
+
+        Optional<ReportEntity> isAlreadyExistOpt = reportRepository.findByClubAndYearAndMonth(club, dto.getYear(), dto.getMonth());
+        if(isAlreadyExistOpt.isPresent()){
+            ReportEntity reportEntity = isAlreadyExistOpt.get();
+            reportEntity.setAiMemberReport(result);
+            return ResponseEntity.ok(result);
+        }
+        ReportEntity reportEntity = ReportEntity.builder()
+                .year(dto.getYear())
+                .month(dto.getMonth())
+                .club(club)
+                .aiMemberReport(result)
+                .build();
+
+        reportRepository.save(reportEntity);
 
         return ResponseEntity.ok(result);
     }
