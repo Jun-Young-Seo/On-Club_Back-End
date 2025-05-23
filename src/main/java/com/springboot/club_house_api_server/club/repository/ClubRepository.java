@@ -21,10 +21,6 @@ public interface ClubRepository extends JpaRepository<ClubEntity, Long> {
     @Query("SELECT c FROM ClubEntity c WHERE c.clubName = :name")
     Optional<ClubEntity> findByClubName(@Param("name") String name);
 
-//    // 이미지 검색용 -- 쓸까?
-//    @Query("SELECT c FROM ClubEntity c WHERE c.clubLogoURL = :clubImageURL")
-//    Optional<ClubEntity> findByClubImageURL(@Param("clubImageURL") String clubImageURL);
-
     // 2. 특정 기간 동안 생성된 클럽 조회 (클럽 생성일 기준)
     @Query("SELECT c FROM ClubEntity c WHERE c.clubCreatedAt BETWEEN :startDate AND :endDate")
     List<ClubEntity> findClubsCreatedBetween(@Param("startDate") LocalDateTime startDate,
