@@ -7,17 +7,22 @@ import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.club_data.entity.ClubDataEntity;
 import com.springboot.club_house_api_server.club_data.repository.ClubDataRepository;
+import com.springboot.club_house_api_server.s3.dto.S3AddClubImageDto;
 import com.springboot.club_house_api_server.s3.dto.S3UploadDto;
-import com.springboot.club_house_api_server.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,43 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    public ResponseEntity<?> uploadImageForAddClub(S3AddClubImageDto dto) throws IOException {
+        MultipartFile logoImageFile = dto.getLogoImageFile();
+        MultipartFile backgroundImageFile = dto.getBackgroundImageFile();
+
+        if (logoImageFile == null || logoImageFile.isEmpty()) {
+            return ResponseEntity.badRequest().body("로고 이미지를 선택해주세요.");
+        }
+        if (backgroundImageFile == null || backgroundImageFile.isEmpty()) {
+            return ResponseEntity.badRequest().body("배경 이미지를 선택해주세요.");
+        }
+
+        List<MultipartFile> fileList = new ArrayList<>();
+        fileList.add(logoImageFile);
+        fileList.add(backgroundImageFile);
+        List<String> response = new ArrayList<>();
+
+        for(MultipartFile file : fileList) {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(file.getContentType());
+            metadata.setContentLength(file.getSize());
+            String uuid = UUID.randomUUID().toString();
+            String fileName = uuid + "_" + file.getOriginalFilename();
+            // S3에 파일 업로드 요청 생성
+            PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata);
+            // S3에 파일 업로드
+            try {
+                amazonS3.putObject(putObjectRequest);
+            }
+            catch (Exception e){
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            }
+
+            String fileURL = getPublicUrl(fileName);
+            response.add(fileURL);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
     public String uploadFile(S3UploadDto dto) throws IOException {
         MultipartFile file = dto.getFile();
         long clubId = dto.getClubId();

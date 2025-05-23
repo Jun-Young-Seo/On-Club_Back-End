@@ -54,13 +54,14 @@ public class ClubService {
         }
         return ResponseEntity.ok(clubs);
     }
+
     //이름으로 클럽 찾기
     public ResponseEntity<?> getClubByName(String clubName) {
         Optional<ClubEntity> club = clubRepository.findByClubName(clubName);
         if (club.isPresent()) {
-            return ResponseEntity.ok(club.get());
+            return ResponseEntity.ok(true);
         }
-        return ResponseEntity.noContent().build(); //HTTP 204 No Content
+        return ResponseEntity.ok(false);
     }
 
     //동호회 신규 생성 - 중복 이름 생성 불가능 + 만든 사람은 자동 LEADER 배정
