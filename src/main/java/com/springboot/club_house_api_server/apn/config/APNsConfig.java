@@ -24,7 +24,7 @@ public class APNsConfig {
         return new ApnsClientBuilder()
                 .setApnsServer(ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
                 .setSigningKey(
-                        ApnsSigningKey.loadFromInputStream(new FileInputStream("AuthKey_ZXXYLTD332.p8"), teamId, keyId)
+                        ApnsSigningKey.loadFromInputStream(new FileInputStream(""), teamId, keyId)
                 )
                 .build();
     }
