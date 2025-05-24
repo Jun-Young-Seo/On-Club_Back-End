@@ -63,12 +63,19 @@ public class JwtTokenGenerator {
         //실패하면 파서단에서 예외가 터지므로 return false가 필요하지 않음
         //터진 예외는 ExceptionHandler에서 처리하도록 했음.
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jws<Claims> jws = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+
+            Date exp = jws.getBody().getExpiration();
+            return true;
         }
-        catch (Exception e) {
+        catch (ExpiredJwtException e) {
+            throw e;
+        } catch (JwtException e) {
             throw e;
         }
-        return true;
     }
 
     //클레임 파싱 메서드
@@ -83,6 +90,9 @@ public class JwtTokenGenerator {
     //토큰발급
     public String createToken(String userId, long expireTime){
         Map<Long,String> userRoles = getUserRoles(Long.parseLong(userId));
+        long now = System.currentTimeMillis();
+        long expire = now + expireTime;
+
 
         return Jwts.builder()
                 .setSubject(userId)

@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 "/api/membership/join/request", "/api/membership/my-role"
                                 ,"/api/membership/withdraw","/api/notification/**", "/api/user/info",
                                 "/api/membership/join/direct-user","/api/membership/join/direct-not-user", "/api/s3/upload-file"
-                        ,"/api/participant/**", "/api/openai/**", "/api/club/get/tags", "/api/s3/add/club/images").permitAll()
+                        ,"/api/participant/**", "/api/openai/**", "/api/club/get/tags", "/api/s3/add/club/images", "/api/apn/**").permitAll()
                         .requestMatchers("/api/budget/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/chart/**").hasAnyRole("MANAGER","LEADER")
                         .requestMatchers("/club/**").hasAnyRole("LEADER","MANAGER")
@@ -63,11 +63,10 @@ public class SecurityConfig {
                 )
                 // 커스텀 예외 필터 -> 인증 필터로 처리
                 // 커스텀 예외 필터에서 만료 토큰, 위조 토큰 처리
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenGenerator),
-                        UsernamePasswordAuthenticationFilter.class
-                )
-                .addFilterBefore(new JwtExceptionFilter(), JwtAuthenticationFilter.class)
+                .addFilterBefore(new JwtExceptionFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenGenerator), JwtExceptionFilter.class)
                 .build();
+
     }
 
     @Bean
