@@ -31,14 +31,16 @@ public class UserController {
         return userService.login(request);
     }
     //Access Token 재발급 엔드포인트
+
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponseDto> refresh(@RequestHeader("Authorization") String refreshToken){
-//        System.out.println(refreshToken);
+    public ResponseEntity<?> refresh(@RequestHeader("Authorization") String refreshToken){
+        System.out.println(refreshToken);
         if(refreshToken!=null && refreshToken.startsWith("Bearer ")){
             refreshToken = refreshToken.substring(7);
         }
-        LoginResponseDto response = userService.refreshToken(refreshToken);
-        return ResponseEntity.ok(response);
+
+        return userService.refreshToken(refreshToken);
+
     }
 
     @PostMapping("/logout")

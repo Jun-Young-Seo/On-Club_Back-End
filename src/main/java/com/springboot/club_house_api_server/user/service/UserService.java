@@ -24,6 +24,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenGenerator jwtTokenGenerator;
+    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 15; // 15분 - accessToken
+    private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7 ; // 24 * 7시간 - RefreshToken 확정 후 상수화 할 것
 
     //회원가입
     public ResponseEntity<?> join(JoinRequestDto joinRequestDto){
@@ -58,12 +60,10 @@ public class UserService {
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 틀렸습니다.");
         }
-        long accessTokenValidity = 1000 * 60 * 15 * 4  ; // 15분 * 4 - accessToken
-        long refreshTokenValidity = 1000 * 60 * 60 * 24 * 7 ; // 24 * 7시간 - RefreshToken 확정 후 상수화 할 것
         String userId = String.valueOf(user.getUserId());
         //setSubject는 String형으로 받으므로 valueOf
-        String accessToken = jwtTokenGenerator.createToken(userId, accessTokenValidity);
-        String refreshToken = jwtTokenGenerator.createToken(userId, refreshTokenValidity);
+        String accessToken = jwtTokenGenerator.createToken(userId, ACCESS_TOKEN_VALIDITY);
+        String refreshToken = jwtTokenGenerator.createToken(userId, REFRESH_TOKEN_VALIDITY);
 
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
@@ -72,24 +72,29 @@ public class UserService {
     }
 
     //refresh Token
-    public LoginResponseDto refreshToken(String refreshToken){
+    public ResponseEntity<?> refreshToken(String refreshToken){
         if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
-            throw new IllegalArgumentException("Invalid Refresh Token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("RefreshToken 검증 실패");
         }
-
         String userId = jwtTokenGenerator.getUserId(refreshToken);
         Optional<UserEntity> user = userRepository.findById(Long.valueOf(userId));
         if(user.isEmpty()){
-            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId에 해당하는 User가 없습니다.");
         }
+
+//        System.out.println("user : "+user.get().getUserName());
+//        System.out.println("user : "+user.get().getUserTel());
+//        System.out.println("user : "+user.get().getRefreshToken());
+
         if(!user.get().getRefreshToken().equals(refreshToken)){
-            throw new IllegalArgumentException("위조된 토큰일 수 있습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("위조된 토큰일 수 있습니다. DB 토큰과 불일치");
         }
 
-        long accessTokenValidity = 1000 * 60 * 15;
-        String newAccessToken = jwtTokenGenerator.createToken(userId,  accessTokenValidity);
+        String newAccessToken = jwtTokenGenerator.createToken(userId,  ACCESS_TOKEN_VALIDITY);
 
-        return new LoginResponseDto(userId, newAccessToken, refreshToken, user.get().getUserName());
+        LoginResponseDto res = new LoginResponseDto(userId, newAccessToken, refreshToken, user.get().getUserName());
+
+        return ResponseEntity.ok(res);
     }
 
     public String logout(String refreshToken){
