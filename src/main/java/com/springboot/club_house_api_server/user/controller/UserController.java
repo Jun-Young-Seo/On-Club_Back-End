@@ -1,8 +1,8 @@
 package com.springboot.club_house_api_server.user.controller;
 
 import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
-import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
-import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
+import com.springboot.club_house_api_server.user.dto.LoginRequestDtoForIOS;
+import com.springboot.club_house_api_server.user.dto.LoginRequestDtoForWeb;
 import com.springboot.club_house_api_server.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +25,19 @@ public class UserController {
 //        return userService.joinMembershipAlreadyUser(userTel, clubId);
 //    }
 
-    //로그인 엔드포인트
+    //로그인 엔드포인트 - 웹용
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequestDto request){
-        return userService.login(request);
+    public ResponseEntity<?> loginForWeb(@RequestBody LoginRequestDtoForWeb request){
+        return userService.loginForWeb(request);
     }
-    //Access Token 재발급 엔드포인트
 
+    //로그인 - ios용 ( 토큰 발급 - 저장, 갱신 )
+    @PostMapping("/login/ios")
+    public ResponseEntity<?> loginForIOS(@RequestBody LoginRequestDtoForIOS request){
+        return userService.loginForIOS(request);
+    }
+
+    //Access Token 재발급 엔드포인트
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("Authorization") String refreshToken){
         System.out.println(refreshToken);
