@@ -1,15 +1,11 @@
 package com.springboot.club_house_api_server.user.service;
 
+import com.springboot.club_house_api_server.apn.entity.APNEntity;
+import com.springboot.club_house_api_server.apn.repository.APNRepository;
 import com.springboot.club_house_api_server.jwt.generator.JwtTokenGenerator;
-import com.springboot.club_house_api_server.membership.service.MembershipService;
-import com.springboot.club_house_api_server.user.dto.JoinRequestDto;
-import com.springboot.club_house_api_server.user.dto.LoginRequestDto;
-import com.springboot.club_house_api_server.user.dto.LoginResponseDto;
-import com.springboot.club_house_api_server.user.dto.UserInfoDto;
+import com.springboot.club_house_api_server.user.dto.*;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +22,7 @@ public class UserService {
     private final JwtTokenGenerator jwtTokenGenerator;
     private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 15; // 15분 - accessToken
     private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7 ; // 24 * 7시간 - RefreshToken 확정 후 상수화 할 것
-
+    private final APNRepository apnRepository;
     //회원가입
     public ResponseEntity<?> join(JoinRequestDto joinRequestDto){
         Optional<UserEntity> userExist = userRepository.findByUserTel(joinRequestDto.getUserTel());
@@ -50,8 +46,8 @@ public class UserService {
     }
 
 
-    //Login
-    public ResponseEntity<?> login(LoginRequestDto loginRequestDto){
+    //Login For Web
+    public ResponseEntity<?> loginForWeb(LoginRequestDtoForWeb loginRequestDto){
         Optional<UserEntity> userOpt = userRepository.findByUserTel(loginRequestDto.getUserTel());
         if(userOpt.isEmpty()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("올바르지 않은 전화번호입니다.");
@@ -71,6 +67,38 @@ public class UserService {
         return ResponseEntity.ok(response);
     }
 
+    public ResponseEntity<?> loginForIOS(LoginRequestDtoForIOS loginRequestDto){
+        Optional<UserEntity> userOpt = userRepository.findByUserTel(loginRequestDto.getUserTel());
+        if(userOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("올바르지 않은 전화번호입니다.");
+        }
+        UserEntity user = userOpt.get();
+        if(!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 틀렸습니다.");
+        }
+        String userId = String.valueOf(user.getUserId());
+        //setSubject는 String형으로 받으므로 valueOf
+        String accessToken = jwtTokenGenerator.createToken(userId, ACCESS_TOKEN_VALIDITY);
+        String refreshToken = jwtTokenGenerator.createToken(userId, REFRESH_TOKEN_VALIDITY);
+
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        String deviceToken = loginRequestDto.getDeviceToken();
+        System.out.println(deviceToken);
+
+        APNEntity apnEntity = new APNEntity();
+        apnEntity.setUser(user);
+        apnEntity.setDeviceToken(deviceToken);
+        apnEntity.setPlatform("IOS");
+
+        apnRepository.save(apnEntity);
+
+        LoginResponseDto response =  new LoginResponseDto(userId,accessToken, refreshToken, user.getUserName());
+
+        return ResponseEntity.ok(response);
+    }
+
     //refresh Token
     public ResponseEntity<?> refreshToken(String refreshToken){
         if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
@@ -81,10 +109,6 @@ public class UserService {
         if(user.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("userId에 해당하는 User가 없습니다.");
         }
-
-//        System.out.println("user : "+user.get().getUserName());
-//        System.out.println("user : "+user.get().getUserTel());
-//        System.out.println("user : "+user.get().getRefreshToken());
 
         if(!user.get().getRefreshToken().equals(refreshToken)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("위조된 토큰일 수 있습니다. DB 토큰과 불일치");

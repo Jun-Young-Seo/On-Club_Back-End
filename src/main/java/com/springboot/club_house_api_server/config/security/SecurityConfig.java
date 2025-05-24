@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/user/login", "/api/user/join", "/api/user/logout","/api/user/refresh"
                                 ,"/api/club/add","/api/club/find/**", "/api/event/get-event/**", "/api/guest/attend/request",
-                                "/api/membership/join/request", "/api/membership/my-role"
+                                "/api/membership/join/request", "/api/membership/my-role", "/api/user/login/ios"
                                 ,"/api/membership/withdraw","/api/notification/**", "/api/user/info",
                                 "/api/membership/join/direct-user","/api/membership/join/direct-not-user", "/api/s3/upload-file"
                         ,"/api/participant/**", "/api/openai/**", "/api/club/get/tags", "/api/s3/add/club/images", "/api/apn/**").permitAll()
