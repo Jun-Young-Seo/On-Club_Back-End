@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
 @Entity
 @Setter
 @Getter
-@Table(name="apn", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "device_token"}))
+//, uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "device_token"}) 적용 ㅇ안됨
+//Maybe ORM 이슈. 워크벤치에서 직접 걸어주면 되지만 매 배포마다 그러긴 좀
+//그냥 서비스 레이어에서 일단 중복 걸러내기로
+@Table(name="apn")
 public class APNEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

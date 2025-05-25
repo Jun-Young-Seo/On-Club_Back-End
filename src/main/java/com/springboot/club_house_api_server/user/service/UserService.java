@@ -75,6 +75,9 @@ public class UserService {
     }
 
     public ResponseEntity<?> loginForIOS(LoginRequestDtoForIOS loginRequestDto){
+        if(loginRequestDto.getDeviceToken().equals("none")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("none");
+        }
         Optional<UserEntity> userOpt = userRepository.findByUserTel(loginRequestDto.getUserTel());
         if(userOpt.isEmpty()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("올바르지 않은 전화번호입니다.");
@@ -93,15 +96,23 @@ public class UserService {
 
         String deviceToken = loginRequestDto.getDeviceToken();
 
-        APNEntity apnEntity = new APNEntity();
-        apnEntity.setUser(user);
-        apnEntity.setDeviceToken(deviceToken);
-        apnEntity.setPlatform("IOS");
+        LocalDateTime now = LocalDateTime.now();
 
-        apnRepository.save(apnEntity);
-
+        //새 기기 발견
+        Optional<APNEntity> apnOpt = apnRepository.findByUserIdAndDeviceToken(Long.valueOf(userId), deviceToken);
+        if(apnOpt.isEmpty()) {
+            APNEntity apnEntity = new APNEntity();
+            apnEntity.setUser(user);
+            apnEntity.setDeviceToken(deviceToken);
+            apnEntity.setPlatform("IOS");
+            apnEntity.setLastUsedAt(now);
+            apnRepository.save(apnEntity);
+        }
+        else{
+            apnOpt.get().setLastUsedAt(now);
+            apnRepository.save(apnOpt.get());
+        }
         LoginResponseDto response =  new LoginResponseDto(userId,accessToken, refreshToken, user.getUserName());
-
         return ResponseEntity.ok(response);
     }
 
