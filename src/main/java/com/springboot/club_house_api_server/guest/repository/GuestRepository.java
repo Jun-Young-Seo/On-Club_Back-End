@@ -22,6 +22,8 @@ public interface GuestRepository extends JpaRepository<GuestEntity, Long> {
     @Query("SELECT g.user.userId FROM GuestEntity g where g.event.eventId = :eventId")
     List<Long> findAllGuestUserIdByEventId(@Param("eventId") Long eventId);
 
+    @Query("SELECT g FROM GuestEntity g WHERE g.user.userId=:userId")
+    List<GuestEntity> findAllGuestEntitiesByUserId(@Param("userId") Long userId);
 
     //이달에 참석한 게스트 ID 가져오기
     //보고서 작성용

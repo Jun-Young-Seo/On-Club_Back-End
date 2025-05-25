@@ -3,14 +3,18 @@ package com.springboot.club_house_api_server.event.service;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.event.dto.ClubEventDto;
+import com.springboot.club_house_api_server.event.dto.MyPageClubEventDto;
 import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
+import com.springboot.club_house_api_server.guest.entity.GuestEntity;
+import com.springboot.club_house_api_server.guest.repository.GuestRepository;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.notification.dto.NotificationSendDto;
 import com.springboot.club_house_api_server.notification.entity.NotificationEntity;
 import com.springboot.club_house_api_server.notification.repository.NotificationRepository;
 import com.springboot.club_house_api_server.notification.service.NotificationService;
+import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -33,6 +37,8 @@ public class ClubEventService {
     private final NotificationRepository notificationRepository;
     private final MembershipRepository membershipRepository;
     private final NotificationService notificationService;
+    private final ParticipantRepository participantRepository;
+    private final GuestRepository guestRepository;
 
     @Transactional
     //이벤트 추가하기
@@ -160,5 +166,35 @@ public class ClubEventService {
         return ResponseEntity.ok(response);
     }
 
+    public ResponseEntity<?> getParticipantsAndGuestsByUserId(long userId){
+        Optional<UserEntity> userOpt = userRepository.findById(userId);
+        if(userOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("user Id에 해당하는 user가 없습니다.");
+        }
+        List<MyPageClubEventDto> response = new ArrayList<>();
+        List<ClubEventEntity> participantList = participantRepository.findAllEventIdsByUserId(userId);
+        for(ClubEventEntity c : participantList){
+            MyPageClubEventDto m = MyPageClubEventDto.builder()
+                    .clubName(c.getClub().getClubName())
+                    .eventDescription(c.getEventDescription())
+                    .eventStartTime(c.getEventStartTime())
+                    .eventEndTime(c.getEventEndTime())
+                    .type("membership")
+                    .build();
+            response.add(m);
+        }
 
+        List<GuestEntity> guest = guestRepository.findAllGuestEntitiesByUserId(userId);
+        for(GuestEntity g : guest){
+            MyPageClubEventDto m = MyPageClubEventDto.builder()
+                    .clubName(g.getClub().getClubName())
+                    .eventDescription(g.getEvent().getEventDescription())
+                    .eventStartTime(g.getEvent().getEventStartTime())
+                    .eventEndTime(g.getEvent().getEventEndTime())
+                    .type("guest")
+                    .build();
+            response.add(m);
+        }
+        return ResponseEntity.ok(response);
+    }
 }
