@@ -40,7 +40,6 @@ public class UserController {
     //Access Token 재발급 엔드포인트
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestHeader("Authorization") String refreshToken){
-        System.out.println(refreshToken);
         if(refreshToken!=null && refreshToken.startsWith("Bearer ")){
             refreshToken = refreshToken.substring(7);
         }
@@ -62,20 +61,10 @@ public class UserController {
     public ResponseEntity<?> getUserInfo(@RequestParam long userId){
         return userService.getUserInfo(userId);
     }
-    //Http-Only Cookie 설정 메소드
-    //2025-03-21 추가
-    //SSL 설정 이슈로 보류 ㅠㅠㅠ
-//    private void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
-//        ResponseCookie cookie = ResponseCookie.from(name, value)
-//                .httpOnly(true)
-//                .secure(false) // ✅ HTTPS가 아니므로 false (배포 시 true로 변경)
-//                .path("/")
-//                .domain("43.201.191.12")
-//                .sameSite("Lax") // ✅ Cross-Origin 요청에서 필요
-//                .maxAge(maxAge)
-//                .build();
-//
-//        response.addHeader("Set-Cookie", cookie.toString());
-//    }
+
+    @GetMapping("/info/mypage")
+    public ResponseEntity<?> getUserInfoForMyPage(@RequestParam long userId, @RequestParam int year, @RequestParam int month){
+        return userService.getUserInfoForMyPage(userId, year, month);
+    }
 
 }

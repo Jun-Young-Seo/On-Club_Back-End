@@ -35,6 +35,14 @@ public interface MembershipRepository extends JpaRepository<MembershipEntity,Lon
     @Query("SELECT COUNT(m) FROM MembershipEntity m WHERE m.club.clubId = :clubId")
     Long countAllMemberships(@Param("clubId")Long clubId);
 
+    //유저가 가입한 모든 클럽 수 - 마이페이지용
+    @Query("""
+        SELECT COUNT(m)
+        FROM MembershipEntity m
+        where m.user.userId = :userId
+    """)
+        Long countMembershipsByUserId(@Param("userId") Long userId);
+
     @Query("""
     SELECT COUNT(m)
     FROM MembershipEntity m

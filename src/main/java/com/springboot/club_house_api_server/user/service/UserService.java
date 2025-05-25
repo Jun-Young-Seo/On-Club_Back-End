@@ -3,6 +3,8 @@ package com.springboot.club_house_api_server.user.service;
 import com.springboot.club_house_api_server.apn.entity.APNEntity;
 import com.springboot.club_house_api_server.apn.repository.APNRepository;
 import com.springboot.club_house_api_server.jwt.generator.JwtTokenGenerator;
+import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
+import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
 import com.springboot.club_house_api_server.user.dto.*;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
@@ -12,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -23,6 +27,9 @@ public class UserService {
     private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 15; // 15분 - accessToken
     private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 7 ; // 24 * 7시간 - RefreshToken 확정 후 상수화 할 것
     private final APNRepository apnRepository;
+    private final MembershipRepository membershipRepository;
+    private final ParticipantRepository participantRepository;
+
     //회원가입
     public ResponseEntity<?> join(JoinRequestDto joinRequestDto){
         Optional<UserEntity> userExist = userRepository.findByUserTel(joinRequestDto.getUserTel());
@@ -85,7 +92,6 @@ public class UserService {
         userRepository.save(user);
 
         String deviceToken = loginRequestDto.getDeviceToken();
-        System.out.println(deviceToken);
 
         APNEntity apnEntity = new APNEntity();
         apnEntity.setUser(user);
@@ -157,5 +163,32 @@ public class UserService {
                 .region(user.get().getRegion())
                 .build();
         return ResponseEntity.ok(userInfoDto);
+    }
+
+    public ResponseEntity<?> getUserInfoForMyPage(long userId, int year, int month){
+        Optional<UserEntity> userOpt = userRepository.findById(userId);
+        if(userOpt.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("user Id에 해당하는 user가 없습니다.");
+        }
+        if(month>12 || month<1){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("날짜 설정 오류");
+        }
+
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+
+        LocalDateTime startDate = firstDay.atStartOfDay();
+        LocalDateTime endDate = lastDay.atTime(23, 59, 59);
+
+        long countMemberships = membershipRepository.countMembershipsByUserId(userId);
+        long countParticipateWithTime = participantRepository.countParticipantsByUserIdWithTime(userId,startDate,endDate);
+        long countParticipate = participantRepository.countParticipantsByUserId(userId);
+
+        MyPageDto myPageDto = new MyPageDto();
+        myPageDto.setCountMemberships(countMemberships);
+        myPageDto.setCountParticipantThisMonth(countParticipateWithTime);
+        myPageDto.setCountAccumulateParticipant(countParticipate);
+
+        return ResponseEntity.ok(myPageDto);
     }
 }
