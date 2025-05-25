@@ -28,6 +28,26 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
     @Query("SELECT COUNT(p) > 0 FROM ParticipantEntity p WHERE p.user.userId = :userId AND p.event.eventId = :eventId")
     boolean existsByUserIdAndEventId(@Param("userId") long userId, @Param("eventId") long eventId);
 
+    //이 달에 참석하는 횟수 - MyPage용
+    @Query("""
+        SELECT COUNT(p)
+        FROM ParticipantEntity p
+        WHERE p.user.userId = :userId 
+            AND
+        p.event.eventStartTime BETWEEN :startDate AND :endDate 
+    """)
+    Long countParticipantsByUserIdWithTime(@Param("userId") Long userId,
+                                   @Param("startDate") LocalDateTime start,
+                                   @Param("endDate") LocalDateTime end);
+
+    //누적 참여수 - MyPage용
+    @Query("""
+        SELECT COUNT(p)
+        FROM ParticipantEntity p
+        WHERE p.user.userId = :userId
+    """)
+    Long countParticipantsByUserId(@Param("userId") Long userId);
+
     //이 달에 참석한 멤버 얻어오기
     //보고서 작성용
     @Query("""
