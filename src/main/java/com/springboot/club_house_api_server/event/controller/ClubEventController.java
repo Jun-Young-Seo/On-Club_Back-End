@@ -59,4 +59,8 @@ public class ClubEventController {
         return clubEventService.getEventsByUserAndDateRange(userId, startDate, endDate);
     }
 
+    @GetMapping("/mypage")
+    public ResponseEntity<?> getParticipantsAndGuestsByUserId(@RequestParam long userId){
+        return clubEventService.getParticipantsAndGuestsByUserId(userId);
+    }
 }
