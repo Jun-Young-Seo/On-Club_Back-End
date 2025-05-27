@@ -1,6 +1,6 @@
 package com.springboot.club_house_api_server.game.controller;
 
-import com.springboot.club_house_api_server.game.dto.GameStartDto;
+import com.springboot.club_house_api_server.game.dto.EndGameDto;
 import com.springboot.club_house_api_server.game.service.GameService;
 import com.springboot.club_house_api_server.game.dto.CreateGameRequestDto;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +23,13 @@ public class GameController {
     }
 
     @PostMapping("/start")
-    public ResponseEntity<?> startGame(@RequestBody GameStartDto gameStartDto) {
-        return gameService.startGame(gameStartDto);
+    public ResponseEntity<?> startGame(@RequestParam Long gameId) {
+        return gameService.startGame(gameId);
     }
 
     @PostMapping("/end")
-    public ResponseEntity<?> endGame(@RequestParam long gameId, @RequestParam int score1, @RequestParam int score2) {
-        return gameService.endGame(gameId, score1, score2);
+    public ResponseEntity<?> endGame(@RequestBody EndGameDto endGameDto) {
+        return gameService.endGame(endGameDto);
     }
 
     @DeleteMapping("/delete")

@@ -19,7 +19,7 @@ public class GameResponseDto {
     private LocalDateTime startAt;
     private LocalDateTime endAt;
     private GameEntity.GameStatus status;
-    private String score;
     private List<Long> userIdList;
-
+    private Long teamOneId;
+    private Long teamTwoId;
 }
