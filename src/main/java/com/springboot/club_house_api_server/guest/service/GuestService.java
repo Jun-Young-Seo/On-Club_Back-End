@@ -11,6 +11,8 @@ import com.springboot.club_house_api_server.notification.dto.NotificationSendDto
 import com.springboot.club_house_api_server.notification.entity.NotificationEntity;
 import com.springboot.club_house_api_server.notification.repository.NotificationRepository;
 import com.springboot.club_house_api_server.notification.service.NotificationService;
+import com.springboot.club_house_api_server.participant.entity.ParticipantEntity;
+import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -31,6 +33,7 @@ public class GuestService {
     private final MembershipRepository membershipRepository;
     private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
+    private final ParticipantRepository participantRepository;
 
     public ResponseEntity<?> attendEventAsGuest(long userId, long eventId){
         Optional<UserEntity> userOpt = userRepository.findById(userId);
@@ -97,6 +100,14 @@ public class GuestService {
 
         guestRepository.save(guestEntity);
         club.setClubAccumulatedGuests(club.getClubAccumulatedGuests() + 1);
+
+        ParticipantEntity p = ParticipantEntity.builder()
+                .event(eventOpt.get())
+                .user(userOpt.get())
+                .club(club)
+                .build();
+
+        participantRepository.save(p);
 
         NotificationSendDto sendDto = NotificationSendDto.builder()
                 .userIdList(List.of(userId))

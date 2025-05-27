@@ -25,9 +25,6 @@ public class GameEntity {
     @JoinColumn(name="event_id",nullable = false)
     private ClubEventEntity event;
 
-    @OneToMany(mappedBy = "game")
-    private List<GameParticipantEntity> gameParticipants = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="club_id",nullable = false)
     private ClubEntity club;
@@ -42,8 +39,6 @@ public class GameEntity {
     @Column(name = "status", nullable = true)
     private GameStatus status;
 
-    @Column(name = "score", nullable = true)
-    private String score;
 
     public enum GameStatus {
         WAITING,
