@@ -1,5 +1,7 @@
 package com.springboot.club_house_api_server.report.dto;
 
+import com.springboot.club_house_api_server.game.dto.GamePlayStatDto;
+import com.springboot.club_house_api_server.game.dto.ScoreStatDto;
 import com.springboot.club_house_api_server.user.dto.UserInfoDto;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import lombok.Builder;
@@ -23,7 +25,7 @@ public class MemberChartDataDto {
     private Integer femaleMembers;
     private Double averageAttendanceRate;
     private List<GameStatDto> mostAttendantMember;
-    private List<GameStatDto> mostWinnerMember;
-    private List<GameStatDto> mostManyGamesMember;
+    private List<ScoreStatDto> mostWinnerMember;
+    private List<GamePlayStatDto> mostManyGamesMember;
 
 }

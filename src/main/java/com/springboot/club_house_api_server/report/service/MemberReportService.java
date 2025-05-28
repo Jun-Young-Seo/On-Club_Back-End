@@ -3,6 +3,8 @@ package com.springboot.club_house_api_server.report.service;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
+import com.springboot.club_house_api_server.game.dto.GamePlayStatDto;
+import com.springboot.club_house_api_server.game.dto.ScoreStatDto;
 import com.springboot.club_house_api_server.game.repository.GameParticipantRepository;
 import com.springboot.club_house_api_server.game.repository.TeamMemberRepository;
 import com.springboot.club_house_api_server.guest.repository.GuestRepository;
@@ -10,6 +12,7 @@ import com.springboot.club_house_api_server.membership.repository.MembershipRepo
 import com.springboot.club_house_api_server.openai.analyze.service.OpenAIService;
 import com.springboot.club_house_api_server.participant.dto.MembersReportDto;
 import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
+import com.springboot.club_house_api_server.report.dto.AttendanceStatDto;
 import com.springboot.club_house_api_server.report.dto.GameStatDto;
 import com.springboot.club_house_api_server.report.dto.MemberChartDataDto;
 import com.springboot.club_house_api_server.user.dto.UserInfoDto;
@@ -58,8 +61,8 @@ public class MemberReportService {
         List<MembersReportDto> attendanceCounts = participantRepository.findMembershipAttendanceCount(startDate, endDate);
 
         List<GameStatDto> top3Attendance = participantRepository.findTopAttendantsByClubAndDateRange(clubId,startDate,endDate,PageRequest.of(0, 3));
-        List<GameStatDto> top3GamesUsers = teamMemberRepository.findTopPlayedUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
-        List<GameStatDto> top3Winner = teamMemberRepository.findTopScoringUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
+        List<GamePlayStatDto> top3GamesUsers = teamMemberRepository.findTopPlayedUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
+        List<ScoreStatDto> top3Winner = teamMemberRepository.findTopScoringUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
 
         MemberChartDataDto chartDataDto = MemberChartDataDto.builder()
                 .year(year)
@@ -98,9 +101,10 @@ public class MemberReportService {
 
         List<UserEntity> guestUserIds = guestRepository.findAttendedGuestUserIds(startDate, endDate);
         List<MembersReportDto> attendanceCounts = participantRepository.findMembershipAttendanceCount(startDate, endDate);
+
         List<GameStatDto> top3Attendance = participantRepository.findTopAttendantsByClubAndDateRange(clubId,startDate,endDate,PageRequest.of(0, 3));
-        List<GameStatDto> top3GamesUsers = teamMemberRepository.findTopPlayedUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
-        List<GameStatDto> top3Winner = teamMemberRepository.findTopScoringUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
+        List<GamePlayStatDto> top3GamesUsers = teamMemberRepository.findTopPlayedUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
+        List<ScoreStatDto> top3Winner = teamMemberRepository.findTopScoringUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
 
 
         MemberChartDataDto chartDataDto = MemberChartDataDto.builder()
