@@ -17,6 +17,7 @@ public class GameController {
     public ResponseEntity<?> getAllGamesByGameId(@RequestParam("eventId") Long eventId) {
         return gameService.getAllGamesByEventId(eventId);
     }
+
     @PostMapping("/make")
     public ResponseEntity<?> makeGame(@RequestBody CreateGameRequestDto createGameRequestDto) {
         return gameService.makeGame(createGameRequestDto);

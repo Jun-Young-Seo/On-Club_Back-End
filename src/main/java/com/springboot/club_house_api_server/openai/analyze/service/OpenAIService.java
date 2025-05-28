@@ -3,6 +3,8 @@ package com.springboot.club_house_api_server.openai.analyze.service;
 import com.springboot.club_house_api_server.budget.dto.CategorySummaryDto;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
+import com.springboot.club_house_api_server.game.dto.GamePlayStatDto;
+import com.springboot.club_house_api_server.game.dto.ScoreStatDto;
 import com.springboot.club_house_api_server.openai.analyze.dto.ClubDescriptionDto;
 import com.springboot.club_house_api_server.openai.analyze.dto.CustomRequestDto;
 import com.springboot.club_house_api_server.openai.analyze.dto.MessageDto;
@@ -231,9 +233,10 @@ public class OpenAIService {
     }
 
     private String buildMemberAnalysisPrompt(MemberChartDataDto dto) {
-        GameStatDto topAttendant = dto.getMostAttendantMember().isEmpty() ? null : dto.getMostAttendantMember().get(0);
-        GameStatDto topGamePlayer = dto.getMostManyGamesMember().isEmpty() ? null : dto.getMostManyGamesMember().get(0);
-        GameStatDto topScorer = dto.getMostWinnerMember().isEmpty() ? null : dto.getMostWinnerMember().get(0);
+        String topAttendantName = dto.getMostAttendantMember().isEmpty() ? "없음" : dto.getMostAttendantMember().get(0).getUserName();
+        String topGamePlayerName = dto.getMostManyGamesMember().isEmpty() ? "없음" : dto.getMostManyGamesMember().get(0).getUserName();
+        String topScorerName = dto.getMostWinnerMember().isEmpty() ? "없음" : dto.getMostWinnerMember().get(0).getUserName();
+
 
         return String.format("""
     아래는 테니스 클럽의 회원 통계 데이터야.
@@ -280,7 +283,7 @@ public class OpenAIService {
     
     👉 출력:
     """,
-                    dto.getHowManyMembers(),
+                dto.getHowManyMembers(),
                 dto.getHowManyMembersBetweenOneMonth(),
                 dto.getHowManyAccumulatedGuests(),
                 dto.getHowManyGuestsBetweenOneMonth(),
@@ -288,9 +291,9 @@ public class OpenAIService {
                 dto.getAttendanceCount(),
                 dto.getMaleMembers(),
                 dto.getFemaleMembers(),
-                topAttendant != null ? topAttendant.getUserName() : "없음",
-                topGamePlayer != null ? topGamePlayer.getUserName() : "없음",
-                topScorer != null ? topScorer.getUserName() : "없음"
+                topAttendantName,
+                topGamePlayerName,
+                topScorerName
         );
     }
 
