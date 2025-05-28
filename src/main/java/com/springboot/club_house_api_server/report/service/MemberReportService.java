@@ -4,16 +4,20 @@ import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
 import com.springboot.club_house_api_server.game.repository.GameParticipantRepository;
+import com.springboot.club_house_api_server.game.repository.TeamMemberRepository;
 import com.springboot.club_house_api_server.guest.repository.GuestRepository;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.openai.analyze.service.OpenAIService;
 import com.springboot.club_house_api_server.participant.dto.MembersReportDto;
 import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
+import com.springboot.club_house_api_server.report.dto.GameStatDto;
 import com.springboot.club_house_api_server.report.dto.MemberChartDataDto;
 import com.springboot.club_house_api_server.user.dto.UserInfoDto;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,6 +38,7 @@ public class MemberReportService {
     private final ClubEventRepository clubEventRepository;
     private final GameParticipantRepository gameParticipantRepository;
     private final OpenAIService openAIService;
+    private final TeamMemberRepository teamMemberRepository;
 
 
     public ResponseEntity<?> getMemberReportChartData(Long clubId, int year, int month) {
@@ -44,8 +49,6 @@ public class MemberReportService {
         }
         ClubEntity club = clubOpt.get();
 
-
-
         LocalDate firstDay = LocalDate.of(year, month, 1);
         LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
 
@@ -53,27 +56,14 @@ public class MemberReportService {
         LocalDateTime endDate = lastDay.atTime(23, 59, 59);
         List<UserEntity> guestUserIds = guestRepository.findAttendedGuestUserIds(startDate, endDate);
         List<MembersReportDto> attendanceCounts = participantRepository.findMembershipAttendanceCount(startDate, endDate);
-        UserEntity topAttendant = participantRepository.findTopEventParticipant(PageRequest.of(0, 1)).get(0);
-        UserEntity topGamer = gameParticipantRepository.findTopGameParticipant(PageRequest.of(0, 1)).get(0);
-        UserInfoDto topAttendantUserInfo = UserInfoDto.builder()
-                .userName(topAttendant.getUserName())
-                .userTel(topAttendant.getUserTel())
-                .gender(topAttendant.getGender())
-                .region(topAttendant.getRegion())
-                .career(topAttendant.getCareer())
-                .birthDate(topAttendant.getBirthDate())
-                .build();
 
-        UserInfoDto topGamerUserInfo = UserInfoDto.builder()
-                .userName(topGamer.getUserName())
-                .userTel(topGamer.getUserTel())
-                .gender(topGamer.getGender())
-                .region(topGamer.getRegion())
-                .career(topGamer.getCareer())
-                .birthDate(topGamer.getBirthDate())
-                .build();
+        List<GameStatDto> top3Attendance = participantRepository.findTopAttendantsByClubAndDateRange(clubId,startDate,endDate,PageRequest.of(0, 3));
+        List<GameStatDto> top3GamesUsers = teamMemberRepository.findTopPlayedUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
+        List<GameStatDto> top3Winner = teamMemberRepository.findTopScoringUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
 
         MemberChartDataDto chartDataDto = MemberChartDataDto.builder()
+                .year(year)
+                .month(month)
                 .howManyMembers(club.getClubHowManyMembers())
                 .howManyMembersBetweenOneMonth(membershipRepository.countMembershipsJoinedBetween(clubId,startDate,endDate))
                 .howManyAccumulatedGuests(club.getClubAccumulatedGuests())
@@ -82,14 +72,15 @@ public class MemberReportService {
                 .attendanceCount(attendanceCounts.size())
                 .maleMembers(membershipRepository.countMembershipsWithGender(clubId, UserEntity.Gender.MALE))
                 .femaleMembers(membershipRepository.countMembershipsWithGender(clubId, UserEntity.Gender.FEMALE))
-                .mostAttendantMember(topAttendantUserInfo)
-                .mostManyGamesMember(topGamerUserInfo)
+                .mostAttendantMember(top3Attendance)
+                .mostManyGamesMember(top3GamesUsers)
+                .mostWinnerMember(top3Winner)
                 .build();
 
-        System.out.println(chartDataDto.toString());
+
         return ResponseEntity.ok(chartDataDto);
     }
-
+//
     public ResponseEntity<?> getAIMemberReport(Long clubId, int year, int month) {
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
         if (clubOpt.isEmpty()) {
@@ -107,25 +98,10 @@ public class MemberReportService {
 
         List<UserEntity> guestUserIds = guestRepository.findAttendedGuestUserIds(startDate, endDate);
         List<MembersReportDto> attendanceCounts = participantRepository.findMembershipAttendanceCount(startDate, endDate);
-        UserEntity topAttendant = participantRepository.findTopEventParticipant(PageRequest.of(0, 1)).get(0);
-        UserEntity topGamer = gameParticipantRepository.findTopGameParticipant(PageRequest.of(0, 1)).get(0);
-        UserInfoDto topAttendantUserInfo = UserInfoDto.builder()
-                .userName(topAttendant.getUserName())
-                .userTel(topAttendant.getUserTel())
-                .gender(topAttendant.getGender())
-                .region(topAttendant.getRegion())
-                .career(topAttendant.getCareer())
-                .birthDate(topAttendant.getBirthDate())
-                .build();
+        List<GameStatDto> top3Attendance = participantRepository.findTopAttendantsByClubAndDateRange(clubId,startDate,endDate,PageRequest.of(0, 3));
+        List<GameStatDto> top3GamesUsers = teamMemberRepository.findTopPlayedUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
+        List<GameStatDto> top3Winner = teamMemberRepository.findTopScoringUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
 
-        UserInfoDto topGamerUserInfo = UserInfoDto.builder()
-                .userName(topGamer.getUserName())
-                .userTel(topGamer.getUserTel())
-                .gender(topGamer.getGender())
-                .region(topGamer.getRegion())
-                .career(topGamer.getCareer())
-                .birthDate(topGamer.getBirthDate())
-                .build();
 
         MemberChartDataDto chartDataDto = MemberChartDataDto.builder()
                 .year(year)
@@ -138,8 +114,9 @@ public class MemberReportService {
                 .attendanceCount(attendanceCounts.size())
                 .maleMembers(membershipRepository.countMembershipsWithGender(clubId, UserEntity.Gender.MALE))
                 .femaleMembers(membershipRepository.countMembershipsWithGender(clubId, UserEntity.Gender.FEMALE))
-                .mostAttendantMember(topAttendantUserInfo)
-                .mostManyGamesMember(topGamerUserInfo)
+                .mostAttendantMember(top3Attendance)
+                .mostManyGamesMember(top3GamesUsers)
+                .mostWinnerMember(top3Winner)
                 .build();
 
         return openAIService.writeMemberReportWithAI(clubId, chartDataDto);

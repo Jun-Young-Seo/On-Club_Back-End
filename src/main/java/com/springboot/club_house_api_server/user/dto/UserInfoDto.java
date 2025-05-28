@@ -17,7 +17,5 @@ public class UserInfoDto {
     private UserEntity.Gender gender;
     private LocalDate birthDate;
     private int career;
-//    private String recommender; //추천인
-
 
 }

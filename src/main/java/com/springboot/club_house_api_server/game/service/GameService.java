@@ -11,7 +11,6 @@ import com.springboot.club_house_api_server.game.entity.GameEntity;
 import com.springboot.club_house_api_server.game.entity.GameParticipantEntity;
 import com.springboot.club_house_api_server.game.entity.TeamEntity;
 import com.springboot.club_house_api_server.game.entity.TeamMemberEntity;
-import com.springboot.club_house_api_server.game.repository.GameParticipantRepository;
 import com.springboot.club_house_api_server.game.repository.GameRepository;
 import com.springboot.club_house_api_server.game.dto.CreateGameRequestDto;
 import com.springboot.club_house_api_server.game.repository.TeamMemberRepository;
@@ -42,7 +41,6 @@ public class GameService {
     private final ClubEventRepository clubEventRepository;
     private final ClubRepository clubRepository;
     private final GameRepository gameRepository;
-    private final GameParticipantRepository gameParticipantRepository;
     private final ParticipantRepository participantRepository;
     private final UserRepository userRepository;
     private final ParticipantService participantService;
@@ -254,14 +252,22 @@ public class GameService {
 
     @Transactional
     public ResponseEntity<?> deleteGame(Long gameId) {
-        GameEntity game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게임입니다. gameId: " + gameId));
+        Optional<GameEntity> gameOpt = gameRepository.findById(gameId);
+        if (gameOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("GAME을 찾을 수 없습니다.");
+        }
+        GameEntity game = gameOpt.get();
 
-        // 1. 게임에 속한 GameParticipant 삭제
-        List<GameParticipantEntity> gameParticipants = gameParticipantRepository.findByGameId(gameId);
-        gameParticipantRepository.deleteAll(gameParticipants);
+        List<TeamEntity> teams = teamRepository.findByGame(game);
+        for(TeamEntity team : teams){
+            //팀 멤버 구성 삭제
+            List<TeamMemberEntity> teamMembers = teamMemberRepository.findByTeam(team);
+            teamMemberRepository.deleteAll(teamMembers);
+        }
+        //팀 삭제
+        teamRepository.deleteAll(teams);
 
-        // 2. 게임 자체 삭제
+        //게임 삭제
         gameRepository.delete(game);
 
         return ResponseEntity.ok("게임이 성공적으로 삭제되었습니다. gameId: " + gameId);
