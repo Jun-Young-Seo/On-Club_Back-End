@@ -5,13 +5,13 @@ import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
 import com.springboot.club_house_api_server.game.entity.GameParticipantEntity;
 import com.springboot.club_house_api_server.game.repository.GameParticipantRepository;
+import com.springboot.club_house_api_server.game.repository.TeamMemberRepository;
 import com.springboot.club_house_api_server.guest.entity.GuestEntity;
 import com.springboot.club_house_api_server.guest.repository.GuestRepository;
 import com.springboot.club_house_api_server.membership.entity.MembershipEntity;
 import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.participant.dto.FindAllEventsDto;
-import com.springboot.club_house_api_server.participant.dto.ParticipantGuestDto;
-import com.springboot.club_house_api_server.participant.dto.ParticipantResponseDto;
+import com.springboot.club_house_api_server.participant.dto.UserFinishedTimeDto;
 import com.springboot.club_house_api_server.participant.entity.ParticipantEntity;
 import com.springboot.club_house_api_server.participant.repository.ParticipantRepository;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
@@ -35,9 +35,9 @@ public class ParticipantService {
     private final UserRepository userRepository;
     private final ClubRepository clubRepository;
     private final ClubEventRepository clubEventRepository;
-    private final GameParticipantRepository gameParticipantRepository;
     private final MembershipRepository membershipRepository;
     private final GuestRepository guestRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
     public ResponseEntity<?> joinToEvent(long userId, long eventId) {
@@ -94,81 +94,14 @@ public class ParticipantService {
     }
 
     public ResponseEntity<?> getAllParticipantsByEventId(long eventId) {
-        List<ParticipantEntity> participantEntityList = participantRepository.findByEventId(eventId);
-        List<Long> guestList = guestRepository.findAllGuestUserIdByEventId(eventId);
-        List<ParticipantResponseDto> response = new ArrayList<>();
-        for(ParticipantEntity participantEntity : participantEntityList) {
-            UserEntity user = participantEntity.getUser();
-            ParticipantResponseDto dto = ParticipantResponseDto.builder()
-                    .userId(user.getUserId())
-//                    .lastGamedAt(LocalDateTime.now())
-                    .userName(user.getUserName())
-                    .gender(user.getGender())
-                    .career(user.getCareer())
-                    .build();
-            response.add(dto);
-        }
-        if(!guestList.isEmpty()) {
-            for (Long guestId : guestList) {
-                UserEntity user = userRepository.findById(guestId).get();
-                ParticipantResponseDto dto = ParticipantResponseDto.builder()
-                        .userId(user.getUserId())
-//                        .lastGamedAt(LocalDateTime.now())
-                        .userName(user.getUserName())
-                        .gender(user.getGender())
-                        .career(user.getCareer())
-                        .build();
-                response.add(dto);
-            }
-        }
-        return ResponseEntity.ok(response);
-    }
-
-    public ResponseEntity<?> updateParticipants(long eventId){
-        List<ParticipantEntity> participantEntityList = participantRepository.findByEventId(eventId);
-        List<Long> guestList = guestRepository.findAllGuestUserIdByEventId(eventId);
-        List<ParticipantResponseDto> response = new ArrayList<>();
-        for(ParticipantEntity participantEntity : participantEntityList) {
-            UserEntity user = participantEntity.getUser();
-            GameParticipantEntity gpe = gameParticipantRepository.findMostRecentGameParticipant(user.getUserId(),eventId);
-            int gameCount = gameParticipantRepository.countGamesByEventIdAndUserId(eventId,user.getUserId());
-            LocalDateTime lastGame = null;
-            if (gpe != null) {
-                lastGame = gpe.getLastGamedAt();
-            }
-            ParticipantResponseDto dto = ParticipantResponseDto.builder()
-                    .userId(user.getUserId())
-//                    .lastGamedAt(lastGame)
-                    .userName(user.getUserName())
-                    .gender(user.getGender())
-                    .career(user.getCareer())
-                    .gameCount(gameCount)
-                    .build();
-            response.add(dto);
-        }
-
-        for(Long guestId : guestList) {
-            UserEntity user = userRepository.findById(guestId).get();
-            GameParticipantEntity gpe = gameParticipantRepository.findMostRecentGameParticipant(user.getUserId(),eventId);
-            int gameCount = gameParticipantRepository.countGamesByEventIdAndUserId(eventId,user.getUserId());
-            LocalDateTime lastGame = null;
-                if (gpe != null) {
-                    lastGame = gpe.getLastGamedAt();
-                }
-                ParticipantResponseDto dto = ParticipantResponseDto.builder()
-                        .userId(user.getUserId())
-//                        .lastGamedAt(lastGame)
-                        .userName(user.getUserName())
-                        .gender(user.getGender())
-                        .career(user.getCareer())
-                        .gameCount(gameCount)
-                        .build();
-                response.add(dto);
+        Optional<ClubEventEntity> clubEventOpt = clubEventRepository.findById(eventId);
+        if (clubEventOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("event를 찾을 수 없습니다.");
         }
 
 
-        return ResponseEntity.ok(response);
-
+        List<UserFinishedTimeDto> finishedTimeDtoList = teamMemberRepository.findAllParticipantInfoByEventId(eventId);
+        return ResponseEntity.ok(finishedTimeDtoList);
     }
 
     public ResponseEntity<?> findAllEventsByUserId(long userId) {
@@ -205,24 +138,5 @@ public class ParticipantService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> getAllGuestsByEventId(long eventId) {
-        List<Long> guestUserIds= guestRepository.findAllGuestUserIdByEventId(eventId);
-        List<ParticipantGuestDto> response = new ArrayList<>();
-        for(Long userId : guestUserIds){
-            UserEntity user = userRepository.findById(userId).get();
-            ParticipantGuestDto dto= ParticipantGuestDto.builder()
-                    .userId(user.getUserId())
-                    .userName(user.getUserName())
-                    .gender(user.getGender())
-//                    .lastGamedAt(LocalDateTime.now())
-                    .career(user.getCareer())
-                    .gameCount(gameParticipantRepository.countGamesByEventIdAndUserId(eventId,userId))
-                    .birthDate(user.getBirthDate())
-                    .region(user.getRegion())
-                    .userTel(user.getUserTel())
-                    .build();
-            response.add(dto);
-        }
-        return ResponseEntity.ok(response);
-    }
+
 }

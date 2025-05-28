@@ -3,6 +3,8 @@ package com.springboot.club_house_api_server.participant.repository;
 import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.participant.dto.MembersReportDto;
 import com.springboot.club_house_api_server.participant.entity.ParticipantEntity;
+import com.springboot.club_house_api_server.report.dto.GameStatDto;
+import com.springboot.club_house_api_server.user.dto.UserInfoDto;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -67,12 +69,31 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
     List<MembersReportDto> findMembershipAttendanceCount(@Param("start") LocalDateTime start,
                                                          @Param("end") LocalDateTime end);
 
-    @Query("""  
-    SELECT p.user
+
+    //모임참가횟수 상위3명
+        @Query("""
+    SELECT new com.springboot.club_house_api_server.report.dto.GameStatDto(
+        u.userName,
+        u.userTel,
+        u.gender,
+        u.career,
+        null,
+        null,
+        COUNT(p)
+    )
     FROM ParticipantEntity p
-    GROUP BY p.user
+    JOIN p.user u
+    WHERE p.event.club.clubId = :clubId
+      AND p.event.eventStartTime BETWEEN :start AND :end
+    GROUP BY u.userId, u.userName, u.userTel, u.gender, u.career
     ORDER BY COUNT(p) DESC
-""")
-    List<UserEntity> findTopEventParticipant(Pageable pageable);
+    """)
+        List<GameStatDto> findTopAttendantsByClubAndDateRange(
+                @Param("clubId") Long clubId,
+                @Param("start") LocalDateTime start,
+                @Param("end") LocalDateTime end,
+                Pageable pageable
+    );
 
 }
+
