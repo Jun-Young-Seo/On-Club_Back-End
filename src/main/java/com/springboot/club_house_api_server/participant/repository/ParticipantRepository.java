@@ -2,6 +2,7 @@ package com.springboot.club_house_api_server.participant.repository;
 
 import com.springboot.club_house_api_server.event.entity.ClubEventEntity;
 import com.springboot.club_house_api_server.participant.dto.MembersReportDto;
+import com.springboot.club_house_api_server.participant.dto.UserFinishedTimeDto;
 import com.springboot.club_house_api_server.participant.entity.ParticipantEntity;
 import com.springboot.club_house_api_server.report.dto.GameStatDto;
 import com.springboot.club_house_api_server.user.dto.UserInfoDto;
@@ -69,6 +70,24 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
     List<MembersReportDto> findMembershipAttendanceCount(@Param("start") LocalDateTime start,
                                                          @Param("end") LocalDateTime end);
 
+    @Query("""
+SELECT new com.springboot.club_house_api_server.participant.dto.UserFinishedTimeDto(
+    u.userId,
+    u.userName,
+    COALESCE(MAX(tm.finishedAt), null),
+    u.career,
+    u.gender,
+    COUNT(tm)
+)
+FROM ParticipantEntity p
+JOIN p.user u
+LEFT JOIN TeamMemberEntity tm
+  ON tm.user.userId = u.userId
+  AND tm.team.game.event.eventId = :eventId
+WHERE p.event.eventId = :eventId
+GROUP BY u.userId, u.userName, u.career, u.gender
+""")
+    List<UserFinishedTimeDto> findAllParticipantStatsByEventId(@Param("eventId") Long eventId);
 
     //모임참가횟수 상위3명
         @Query("""

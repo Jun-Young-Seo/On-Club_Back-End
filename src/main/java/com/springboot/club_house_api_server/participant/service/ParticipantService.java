@@ -96,24 +96,13 @@ public class ParticipantService {
     public ResponseEntity<?> getAllParticipantsByEventId(long eventId) {
         Optional<ClubEventEntity> clubEventOpt = clubEventRepository.findById(eventId);
         if (clubEventOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("event를 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("event를 찾을 수 없습니다.");
         }
-        List<ParticipantEntity> participantEntityList = participantRepository.findByEventId(eventId);
-        List<UserFinishedTimeDto> response = new ArrayList<>();
-        for(ParticipantEntity p : participantEntityList){
-            UserEntity user = p.getUser();
-            UserFinishedTimeDto u = UserFinishedTimeDto.builder()
-                    .userId(user.getUserId())
-                    .userName(user.getUserName())
-                    .lastGamedAt(null)
-                    .career(user.getCareer())
-                    .gender(user.getGender())
-                    .gameCount(0L)
-                    .build();
-            response.add(u);
-        }
-//        List<UserFinishedTimeDto> finishedTimeDtoList = teamMemberRepository.findAllParticipantInfoByEventId(eventId);
-        return ResponseEntity.ok(response);
+
+        List<UserFinishedTimeDto> result = participantRepository.findAllParticipantStatsByEventId(eventId);
+        return ResponseEntity.ok(result);
+
     }
 
     public ResponseEntity<?> findAllEventsByUserId(long userId) {
