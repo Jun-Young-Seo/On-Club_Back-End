@@ -13,7 +13,6 @@ import java.util.List;
 public interface GameParticipantRepository extends JpaRepository<GameParticipantEntity, Long> {
 
 
-
     @Query("""
     SELECT gp.user
     FROM GameParticipantEntity gp
