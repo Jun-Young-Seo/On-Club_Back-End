@@ -1,5 +1,8 @@
 package com.springboot.club_house_api_server.membership.service;
 
+import com.springboot.club_house_api_server.apn.entity.APNEntity;
+import com.springboot.club_house_api_server.apn.repository.APNRepository;
+import com.springboot.club_house_api_server.apn.service.APNsService;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.event.repository.ClubEventRepository;
@@ -21,9 +24,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -36,10 +41,11 @@ public class MembershipService {
     private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final APNRepository apnRepository;
+    private final APNsService apnService;
     @Transactional
     //클럽에 가입 요청하는 경우
-    public ResponseEntity<?> joinRequestToClub(long userId, long clubId) {
+    public ResponseEntity<?> joinRequestToClub(long userId, long clubId) throws ExecutionException, InterruptedException {
         //유저 확인
         Optional<UserEntity> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
@@ -72,12 +78,17 @@ public class MembershipService {
                         .build();
         notificationService.sendNotification(sendDto);
 
+        Optional<APNEntity> apnOpt = apnRepository.findByUserId(userId);
+        //이게 있으면 우리 서비스에 IOS로 로그인 한 경우가 있었다
+        if(apnOpt.isPresent()){
+            apnService.sendPush(apnOpt.get().getDeviceToken());
+        }
         return ResponseEntity.ok("정상적으로 가입신청 되었습니다.");
 
     }
 
 
-    public ResponseEntity<?> approveJoinRequest(long userId, long clubId) {
+    public ResponseEntity<?> approveJoinRequest(long userId, long clubId) throws ExecutionException, InterruptedException {
         //유저 확인
         Optional<UserEntity> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
@@ -117,6 +128,11 @@ public class MembershipService {
                 .userIdList(List.of(userOpt.get().getUserId()))
                 .build();
         notificationService.sendNotification(sendDto);
+
+        Optional<APNEntity> apnOpt = apnRepository.findByUserId(userId);
+        if (apnOpt.isPresent()) {
+            apnService.sendPush(apnOpt.get().getDeviceToken());
+        }
 
         return ResponseEntity.ok(clubName+"에 "+ userTel+" 님이 성공적으로 가입되었습니다.");
     }

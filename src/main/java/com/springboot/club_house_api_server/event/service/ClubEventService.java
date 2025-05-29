@@ -1,5 +1,8 @@
 package com.springboot.club_house_api_server.event.service;
 
+import com.springboot.club_house_api_server.apn.entity.APNEntity;
+import com.springboot.club_house_api_server.apn.repository.APNRepository;
+import com.springboot.club_house_api_server.apn.service.APNsService;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
 import com.springboot.club_house_api_server.event.dto.ClubEventDto;
@@ -27,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +43,12 @@ public class ClubEventService {
     private final NotificationService notificationService;
     private final ParticipantRepository participantRepository;
     private final GuestRepository guestRepository;
+    private final APNRepository apnRepository;
+    private final APNsService apnService;
 
     @Transactional
     //이벤트 추가하기
-    public ResponseEntity<?> addEvent(long clubId, LocalDateTime startTime, LocalDateTime endTime, String description){
+    public ResponseEntity<?> addEvent(long clubId, LocalDateTime startTime, LocalDateTime endTime, String description) throws ExecutionException, InterruptedException {
         Optional<ClubEntity> clubOpt = clubRepository.findById(clubId);
 //        System.out.println("clubId : "+clubId);
         if(clubOpt.isEmpty()){
@@ -68,6 +74,15 @@ public class ClubEventService {
                 .build();
         notificationService.sendNotification(sendDto);
         clubEventRepository.save(clubEvent);
+
+        for(Long mId : memberIds){
+            Optional<APNEntity> apnOpt = apnRepository.findById(mId);
+            if(apnOpt.isPresent()){
+                APNEntity apn = apnOpt.get();
+                apnService.sendPush(apn.getDeviceToken());
+            }
+
+        }
         return ResponseEntity.status(HttpStatus.OK).body("이벤트가 정상적으로 추가되었습니다.");
     }
 

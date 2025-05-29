@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,12 +21,12 @@ public class MembershipController {
 
 
     @PostMapping("/join/request")
-    public ResponseEntity<?> joinRequestToClub(@RequestBody MembershipJoinDto membershipJoinDto){
+    public ResponseEntity<?> joinRequestToClub(@RequestBody MembershipJoinDto membershipJoinDto) throws ExecutionException, InterruptedException {
         return membershipService.joinRequestToClub(membershipJoinDto.getUserId(), membershipJoinDto.getClubId());
     }
 
     @PostMapping("/join/approve")
-    public ResponseEntity<?> joinApproveToClub(@RequestBody MembershipJoinDto membershipJoinDto){
+    public ResponseEntity<?> joinApproveToClub(@RequestBody MembershipJoinDto membershipJoinDto) throws ExecutionException, InterruptedException {
         return membershipService.approveJoinRequest(membershipJoinDto.getUserId(), membershipJoinDto.getClubId());
     }
 
