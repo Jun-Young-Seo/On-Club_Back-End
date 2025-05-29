@@ -73,7 +73,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-//      // Authorization 헤더에서 Bearer 토큰 추출
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7); // "Bearer " 이후의 토큰 반환
+        }
+
+      // Authorization 헤더에서 Bearer 토큰 추출
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("accessToken".equals(cookie.getName())) {
@@ -82,12 +87,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         return null;
-//
-//        String bearerToken = request.getHeader("Authorization");
-//        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-//            return bearerToken.substring(7); // "Bearer " 이후의 토큰 반환
-//        }
-//
 }
     private void handleJwtError(HttpServletResponse response, String error, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
