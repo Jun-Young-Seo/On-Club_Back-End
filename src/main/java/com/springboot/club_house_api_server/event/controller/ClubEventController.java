@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class ClubEventController {
 
     //이벤트 추가
     @PostMapping("/add-event")
-    public ResponseEntity<?> addEvent(@RequestBody ClubEventDto dto){
+    public ResponseEntity<?> addEvent(@RequestBody ClubEventDto dto) throws ExecutionException, InterruptedException {
         return clubEventService.addEvent(dto.getClubId(), dto.getEventStartTime(), dto.getEventEndTime(), dto.getEventDescription());
     }
 

@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface APNRepository extends JpaRepository<APNEntity, Long> {
+
     @Query("SELECT a FROM APNEntity a WHERE a.user.userId = :userId AND a.deviceToken = :deviceToken")
     Optional<APNEntity> findByUserIdAndDeviceToken(@Param("userId") Long userId,
                                                    @Param("deviceToken") String deviceToken);
 
+    @Query("SELECT a from APNEntity a where a.user.userId = :userId")
+    Optional<APNEntity> findByUserId(@Param("userId") Long userId);
 }

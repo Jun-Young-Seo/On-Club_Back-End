@@ -9,7 +9,11 @@ import com.springboot.club_house_api_server.apn.config.APNsConfig;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +24,10 @@ public class APNsService {
     @Value("${apn.bundle.id}")
     private String bundleId;
 
-    public void sendTestPush(String deviceToken) throws Exception {
+    public ResponseEntity<?> sendPush(String deviceToken) throws ExecutionException, InterruptedException {
         String payload = new SimpleApnsPayloadBuilder()
                 .setAlertTitle("On-Club 알림")
-                .setAlertBody("테스트 푸시입니다! 연결 성공")
+                .setAlertBody("On-Club에서 알림이 도착했어요.")
                 .setSound("default")
                 .build();
 
@@ -34,13 +38,12 @@ public class APNsService {
                 apnsClient.sendNotification(notification);
 
         PushNotificationResponse<SimpleApnsPushNotification> response = future.get();
-
-        if (response.isAccepted()) {
-            System.out.println("푸시 전송 성공!");
-        } else {
-            System.err.println("푸시 거절됨: " + response.getRejectionReason());
-            response.getTokenInvalidationTimestamp().ifPresent(ts ->
-                    System.err.println("이 토큰은 " + ts + " 이후로 무효입니다."));
+        if(response.isAccepted()){
+            return ResponseEntity.ok("");
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+
 }

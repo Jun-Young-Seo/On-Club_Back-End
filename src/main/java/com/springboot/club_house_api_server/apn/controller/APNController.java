@@ -17,7 +17,7 @@ public class APNController {
     @GetMapping("/test")
     public ResponseEntity<?> sendPush(@RequestParam String deviceToken) throws Exception {
         try {
-            apnsService.sendTestPush(deviceToken);
+            apnsService.sendPush(deviceToken);
             return ResponseEntity.ok("푸시 전송 시도됨");
         } catch (Exception e) {
             e.printStackTrace();
