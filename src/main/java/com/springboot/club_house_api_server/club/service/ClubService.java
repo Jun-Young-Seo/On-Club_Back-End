@@ -137,7 +137,7 @@ public class ClubService {
         SearchClubResponseDto dto = new SearchClubResponseDto();
         ClubEntity club = clubOpt.get();
 
-        Long clubMemberCount = membershipRepository.countAllMemberships(id);
+        Long clubMemberCount = Long.valueOf(membershipRepository.countAllMemberships(id));
         Long guestCount = guestRepository.countByClub_ClubId(id);
         dto.setClub_id(club.getClubId());
         dto.setClubName(club.getClubName());
