@@ -33,7 +33,7 @@ public interface MembershipRepository extends JpaRepository<MembershipEntity,Lon
     List<Long> findUserIdsOfAllRolesByClubId(@Param("clubId") Long clubId);
 
     @Query("SELECT COUNT(m) FROM MembershipEntity m WHERE m.club.clubId = :clubId")
-    Long countAllMemberships(@Param("clubId")Long clubId);
+    Integer countAllMemberships(@Param("clubId")Long clubId);
 
     //유저가 가입한 모든 클럽 수 - 마이페이지용
     @Query("""
