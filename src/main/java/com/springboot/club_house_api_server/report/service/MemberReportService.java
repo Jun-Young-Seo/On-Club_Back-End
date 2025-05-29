@@ -112,7 +112,7 @@ public class MemberReportService {
         MemberChartDataDto chartDataDto = MemberChartDataDto.builder()
                 .year(year)
                 .month(month)
-                .howManyMembers(club.getClubHowManyMembers())
+                .howManyMembers(membershipRepository.countAllMemberships(clubId))
                 .howManyMembersBetweenOneMonth(membershipRepository.countMembershipsJoinedBetween(clubId,startDate,endDate))
                 .howManyAccumulatedGuests(club.getClubAccumulatedGuests())
                 .howManyGuestsBetweenOneMonth(guestUserIds.size())
