@@ -7,6 +7,8 @@ import com.springboot.club_house_api_server.club.dto.ModifyTagDto;
 import com.springboot.club_house_api_server.club.dto.SearchClubResponseDto;
 import com.springboot.club_house_api_server.club.entity.ClubEntity;
 import com.springboot.club_house_api_server.club.repository.ClubRepository;
+import com.springboot.club_house_api_server.guest.repository.GuestRepository;
+import com.springboot.club_house_api_server.membership.repository.MembershipRepository;
 import com.springboot.club_house_api_server.membership.service.MembershipService;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
@@ -31,6 +33,8 @@ public class ClubService {
     private final ClubAccountRepository clubAccountRepository;
     private final UserRepository userRepository;
     private final MembershipService membershipService;
+    private final MembershipRepository membershipRepository;
+    private final GuestRepository guestRepository;
 
     //모든 클럽 조회 메서드
     //이 메서드는 사용자 가입 여부와 관계 없이 모든 클럽 반환 --> FE 렌더링용
@@ -132,12 +136,18 @@ public class ClubService {
         }
         SearchClubResponseDto dto = new SearchClubResponseDto();
         ClubEntity club = clubOpt.get();
+
+        Long clubMemberCount = membershipRepository.countAllMemberships(id);
+        Long guestCount = guestRepository.countByClub_ClubId(id);
         dto.setClub_id(club.getClubId());
         dto.setClubName(club.getClubName());
         dto.setClubDescription(club.getClubDescription());
         dto.setClubLogoURL(club.getClubLogoURL());
         dto.setClubBackgroundImageURL(club.getClubBackgroundURL());
         dto.setClubWhenCreated(club.getClubCreatedAt());
+        dto.setClubDescriptionDetail(club.getClubDescriptionDetail());
+        dto.setClubMemberCount(clubMemberCount);
+        dto.setGuestCount(guestCount);
         dto.setTagOne(club.getClubTagOne());
         dto.setTagTwo(club.getClubTagTwo());
         dto.setTagThree(club.getClubTagThree());

@@ -14,9 +14,12 @@ public class SearchClubResponseDto {
     private long club_id;
     private String clubName;
     private String clubDescription;
+    private String clubDescriptionDetail;
     private String clubLogoURL;
     private String clubBackgroundImageURL;
     private LocalDateTime clubWhenCreated;
+    private Long clubMemberCount;
+    private Long guestCount;
     private String tagOne;
     private String tagTwo;
     private String tagThree;

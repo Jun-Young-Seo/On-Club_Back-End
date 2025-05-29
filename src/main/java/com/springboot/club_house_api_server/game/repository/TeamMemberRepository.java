@@ -24,7 +24,7 @@ public interface TeamMemberRepository extends JpaRepository<TeamMemberEntity, Lo
     SELECT new com.springboot.club_house_api_server.participant.dto.UserFinishedTimeDto(
         u.userId,
         u.userName,
-        MAX(t.endAt),
+        MAX(t.startAt),
         u.career,
         u.gender,
         COUNT(g)
@@ -52,7 +52,7 @@ FROM TeamMemberEntity tm
 JOIN tm.user u
 JOIN tm.team t
 JOIN t.game g
-WHERE g.endAt BETWEEN :start AND :end
+WHERE g.startAt BETWEEN :start AND :end
   AND g.club.clubId = :clubId
 GROUP BY u.userId, u.userName, u.userTel, u.gender, u.career
 ORDER BY SUM(t.teamScore) DESC

@@ -63,7 +63,9 @@ public class MemberReportService {
         List<GameStatDto> top3Attendance = participantRepository.findTopAttendantsByClubAndDateRange(clubId,startDate,endDate,PageRequest.of(0, 3));
         List<GamePlayStatDto> top3GamesUsers = teamMemberRepository.findTopPlayedUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
         List<ScoreStatDto> top3Winner = teamMemberRepository.findTopScoringUsersInClubBetween(clubId,startDate,endDate,PageRequest.of(0,3));
-
+        System.out.println(top3Attendance.size());
+        System.out.println(top3GamesUsers.size());
+        System.out.println(top3Winner.size());
         MemberChartDataDto chartDataDto = MemberChartDataDto.builder()
                 .year(year)
                 .month(month)

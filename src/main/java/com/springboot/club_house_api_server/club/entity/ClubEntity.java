@@ -42,7 +42,7 @@ public class ClubEntity {
     private LocalDateTime clubCreatedAt;
 
     //클럽 상세페이징에서 사용할 상세 소개글 필드
-    @Column(name="club_description_detail")
+    @Column(name="club_description_detail", columnDefinition = "TEXT")
     private String clubDescriptionDetail;
 
     //멤버 수
