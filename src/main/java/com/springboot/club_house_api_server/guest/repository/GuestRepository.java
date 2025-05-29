@@ -13,6 +13,8 @@ import java.util.Optional;
 
 public interface GuestRepository extends JpaRepository<GuestEntity, Long> {
 
+    long countByClub_ClubId(Long clubId);
+
     @Query("SELECT g FROM GuestEntity g WHERE g.user = :user AND g.event = :event")
     Optional<GuestEntity> findByUserAndEvent(@Param("user") UserEntity user, @Param("event") ClubEventEntity event);
 
