@@ -8,12 +8,19 @@ import com.springboot.club_house_api_server.participant.repository.ParticipantRe
 import com.springboot.club_house_api_server.user.dto.*;
 import com.springboot.club_house_api_server.user.entity.UserEntity;
 import com.springboot.club_house_api_server.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -54,7 +61,7 @@ public class UserService {
 
 
     //Login For Web
-    public ResponseEntity<?> loginForWeb(LoginRequestDtoForWeb loginRequestDto){
+    public ResponseEntity<?> loginForWeb(LoginRequestDtoForWeb loginRequestDto, HttpServletResponse response){
         Optional<UserEntity> userOpt = userRepository.findByUserTel(loginRequestDto.getUserTel());
         if(userOpt.isEmpty()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("올바르지 않은 전화번호입니다.");
@@ -70,8 +77,28 @@ public class UserService {
 
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
-        LoginResponseDto response =  new LoginResponseDto(userId,accessToken, refreshToken, user.getUserName());
-        return ResponseEntity.ok(response);
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true) // 로컬에서는 false
+                .sameSite("None")
+                .path("/")
+                .maxAge(Duration.ofMinutes(15))
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(Duration.ofDays(7))
+                .build();
+        LoginResponseDto loginResponse =  new LoginResponseDto(userId,accessToken, refreshToken, user.getUserName());
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+
+        return ResponseEntity.ok(loginResponse);
     }
 
     public ResponseEntity<?> loginForIOS(LoginRequestDtoForIOS loginRequestDto){
@@ -117,7 +144,17 @@ public class UserService {
     }
 
     //refresh Token
-    public ResponseEntity<?> refreshToken(String refreshToken){
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response){
+        String refreshToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refreshToken".equals(cookie.getName())) {
+//                    System.out.println("refreshTOken : " +cookie.getValue());
+                    refreshToken = cookie.getValue();
+                }
+            }
+        }
+
         if(refreshToken == null || !jwtTokenGenerator.validateToken(refreshToken)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("RefreshToken 검증 실패");
         }
@@ -132,8 +169,17 @@ public class UserService {
         }
 
         String newAccessToken = jwtTokenGenerator.createToken(userId,  ACCESS_TOKEN_VALIDITY);
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(Duration.ofMinutes(15))
+                .build();
 
-        LoginResponseDto res = new LoginResponseDto(userId, newAccessToken, refreshToken, user.get().getUserName());
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
+        LoginResponseDto res = new LoginResponseDto(userId, null, null, user.get().getUserName());
 
         return ResponseEntity.ok(res);
     }

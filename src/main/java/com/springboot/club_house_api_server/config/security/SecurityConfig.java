@@ -6,6 +6,7 @@ import com.springboot.club_house_api_server.jwt.generator.JwtTokenGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -59,6 +60,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/api/participant/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/s3/**").hasAnyRole("LEADER","MANAGER")
                         .requestMatchers("/api/guest/**").hasAnyRole("LEADER","MANAGER")
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // 커스텀 예외 필터 -> 인증 필터로 처리
@@ -79,7 +81,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
+        configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "https://on-club.co.kr",
                 "https://www.on-club.co.kr"
