@@ -65,7 +65,7 @@ public class ClubEventService {
         List<Long> memberIds = membershipRepository.findUserIdsOfAllRolesByClubId(clubId);
         NotificationSendDto sendDto = NotificationSendDto.builder()
                 .type(NotificationEntity.NotificationType.NOTICE)
-                .message("신규 클럽 일정이 생성되었습니다. :" +description)
+                .message("신규 클럽 일정이 생성되었습니다. : " +"\n"+ description)
                 .title("클럽 신규 일정")
                 .sender(clubName)
                 .userIdList(memberIds)

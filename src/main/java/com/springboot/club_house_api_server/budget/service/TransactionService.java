@@ -169,7 +169,7 @@ public class TransactionService {
         else{
          balance = balanceOpt.get().getTransactionBalance();
         }
-        long monthlySurplus = income - expense;
+        long monthlySurplus = income + expense;
 
         DashBoardMonthInfoDto response = DashBoardMonthInfoDto.builder()
                 .monthlyIncome(income)
